@@ -71,4 +71,4 @@ db.execute('SELECT * FROM products')
 
 ## accessible routes
 
-src/routes/shop-routes.js
+src/routes/
