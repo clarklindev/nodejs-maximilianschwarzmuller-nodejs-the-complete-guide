@@ -76,6 +76,7 @@ src/routes/
 ## Sequelize
 
 - use sequelize to replace the need for SQL queries
+- drop db on mysql workbench (restart using sequelize)
 
 ```
 npm i mysql2
