@@ -72,3 +72,12 @@ db.execute('SELECT * FROM products')
 ## accessible routes
 
 src/routes/
+
+## Sequelize
+
+- use sequelize to replace the need for SQL queries
+
+```
+npm i mysql2
+npm i sequelize
+```
