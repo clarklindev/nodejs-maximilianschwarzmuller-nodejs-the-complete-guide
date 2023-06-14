@@ -1,23 +1,21 @@
 {
-  "name": "nodejs-complete-guide",
+  "name": "10-backend-mongodb-no-mongoose",
+  "description": "install",
   "version": "1.0.0",
-  "description": "Complete Node.js Guide",
-  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
-  },
-  "author": "Maximilian Schwarzmüller",
-  "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.18.3"
+    "start": "nodemon app.js"
   },
   "dependencies": {
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.20.2",
     "dotenv": "^16.1.4",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
+    "express": "^4.18.2",
     "mongodb": "^5.6.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
