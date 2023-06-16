@@ -2,21 +2,22 @@ const mongodb = require('mongodb');
 const { getDb } = require('../utils/database');
 
 class Product {
-  constructor(title, price, description, imageUrl, id) {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
-    this.id = id ? new mongodb.ObjectId(id) : null;
+    this._id = id ? new mongodb.ObjectId(id) : null;
+    this.userId = userId; //connects to user via userId
   }
   async save() {
     const db = getDb();
     let result;
     //edit mode
-    if (this.id) {
+    if (this._id) {
       result = await db
         .collection('products')
-        .updateOne({ _id: this.id }, { $set: this }); // { $set: this } describes the changes we want to make
+        .updateOne({ _id: this._id }, { $set: this }); // { $set: this } describes the changes we want to make
     }
     //create mode
     else {
