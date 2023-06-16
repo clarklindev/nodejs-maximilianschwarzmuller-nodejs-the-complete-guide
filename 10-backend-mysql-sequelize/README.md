@@ -4,22 +4,24 @@
 
 ## install
 
-"body-parser": "^1.20.2",
-"dotenv": "^16.1.4",
-"express": "^4.18.2",
+- install mysql / mysql workbench
 
-<!-- "mysql2": "^3.3.3" -->
-
-"sequelize"
-
-- mysql community server
-- mysql workbench
+  - mysql community server
+  - mysql workbench
 
 OR
 
 - mysql installer but ensure that you install
+
   - mysql community server
   - mysql workbench
+
+- npm packages
+  "body-parser": "^1.20.2",
+  "dotenv": "^16.1.4",
+  "express": "^4.18.2",
+  <!-- "mysql2": "^3.3.3" -->   //replaced by sequelize
+  "sequelize"
 
 ## express
 
