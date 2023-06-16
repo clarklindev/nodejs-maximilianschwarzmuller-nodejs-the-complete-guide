@@ -23,7 +23,14 @@ exports.addProduct = async (req, res, next) => {
   const description = req.body.description;
   const imageUrl = req.body.imageUrl;
 
-  const product = new Product(title, price, description, imageUrl);
+  const product = new Product(
+    title,
+    price,
+    description,
+    imageUrl,
+    null,
+    req.user._id
+  );
   try {
     await product.save();
     res.status(200).json({ status: 'PRODUCT CREATED' });
@@ -45,7 +52,8 @@ exports.editProduct = async (req, res, next) => {
     updatedPrice,
     updatedDesc,
     updatedImageUrl,
-    prodId
+    prodId,
+    req.user._id
   );
   try {
     const result = await product.save();

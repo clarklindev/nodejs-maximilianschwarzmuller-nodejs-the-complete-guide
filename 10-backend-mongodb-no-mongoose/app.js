@@ -12,17 +12,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const { mongoConnect } = require('./src/utils/database');
 
-const adminRoutes = require('./src/routes/admin-routes');
-const shopRoutes = require('./src/routes/shop-routes');
+const User = require('./src/models/user');
+const adminRoutes = require('./src/routes/admin');
+const shopRoutes = require('./src/routes/shop');
 // const errorController = require('./src/controllers/error');
-// app.use((req, res, next) => {
-// User.findById(1)
-//   .then((user) => {
-//     req.user = user;
-//     next();
-//   })
-//   .catch((err) => console.log(err));
-// });
+
+//adds .user to req
+app.use(async (req, res, next) => {
+  try {
+    const user = await User.findById('648bac5406105f612075b996');
+    req.user = new User(user.name, user.email, user.cart, user._id);
+    next();
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
