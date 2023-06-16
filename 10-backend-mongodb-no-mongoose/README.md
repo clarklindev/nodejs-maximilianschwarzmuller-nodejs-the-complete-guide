@@ -1,10 +1,20 @@
 # backend - mongodb - no mongoose
 
 - using express (built ontop of node)
+- from tutorial by maximilianschwarzmuller - nodejs-the-complete-guide: https://github.com/clarklindev/tutorial-maximilianschwarzmuller-nodejs.git
+  - a copy of 10-backend-mongodb-no-mongoose/
 
 ### install mongodb
 
 - use mongo atlas - create user account, db, allow ip
+
+- project: NODEJS-THE-COMPLETE-GUIDE-BACKEND-MONGODB-NO-MONGOOSE
+- connection string: mongodb+srv://clarkcookie:<password>@cluster0.g7sijtf.mongodb.net/?retryWrites=true&w=majority
+
+- db collections: orders, products, users
+
+- test with postman
+- dont forget to configure .env with mongodb username/password
 
 ```
 npm i mongodb
