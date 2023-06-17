@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-const { getDb } = require('../utils/database');
+// const { getDb } = require('../utils/database');
 
 const getProducts = async (req, res, next) => {
   try {
