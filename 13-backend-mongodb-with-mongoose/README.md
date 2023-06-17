@@ -48,6 +48,10 @@ module.exports = mongoose.model('Product', productSchema);
   - makes it plural form
   - so "Product" becomes "products"
 
+## Mongoose GET
+
+- Product.find() returns the actual products (not like mongodb which returns a cursor to products)
+
 ## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
 
 ## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
