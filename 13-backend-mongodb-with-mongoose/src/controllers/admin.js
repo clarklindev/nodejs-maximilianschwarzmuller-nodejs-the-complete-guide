@@ -23,14 +23,14 @@ exports.addProduct = async (req, res, next) => {
   const description = req.body.description;
   const imageUrl = req.body.imageUrl;
 
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    null,
-    req.user._id
-  );
+  //Mongoose - pass an object to Product - eg... { title (refers to title from schema) : title (refers to req.body.title) }
+  const product = new Product({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+  });
+
   try {
     await product.save();
     res.status(200).json({ status: 'PRODUCT CREATED' });
