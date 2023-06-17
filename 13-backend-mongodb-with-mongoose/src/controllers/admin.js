@@ -47,15 +47,12 @@ exports.editProduct = async (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDesc,
-    updatedImageUrl,
-    prodId,
-    req.user._id
-  );
   try {
+    const product = await Product.findById(prodId);
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.description = updatedDesc;
+    product.imageUrl = updatedImageUrl;
     const result = await product.save();
     res.json({ status: 'PRODUCT EDITED', result });
   } catch (err) {
