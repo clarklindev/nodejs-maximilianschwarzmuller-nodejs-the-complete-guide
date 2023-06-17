@@ -1,5 +1,17 @@
 # backend mongodb - with mongoose
 
+- no need for database.js (mongodb managed)
+
+```js
+const mongoose = require('mongoose');
+
+mongoose.connect(
+  `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@ac-one7kcu-shard-00-00.g7sijtf.mongodb.net:27017,ac-one7kcu-shard-00-01.g7sijtf.mongodb.net:27017,ac-one7kcu-shard-00-02.g7sijtf.mongodb.net:27017/?ssl=true&replicaSet=atlas-edr9tf-shard-0&authSource=admin&retryWrites=true&w=majority`
+);
+```
+
+## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
+
 # backend - mongodb - no mongoose
 
 - using express (built ontop of node)
