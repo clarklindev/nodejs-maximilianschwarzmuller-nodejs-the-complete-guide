@@ -52,6 +52,35 @@ module.exports = mongoose.model('Product', productSchema);
 
 - Product.find() returns the actual products (not like mongodb which returns a cursor to products)
 
+## Create
+
+- create a default user if no users exist
+- then go to mongodb atlas and copy userid and paste in app.js as middleware to use a default user in requests
+
+```js
+// app.js
+app.use(async (req, res, next) => {
+  try {
+    const user = await User.findById('648d9b2926121ba0bf431eed');
+    req.user = user;
+    next();
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+});
+
+let user = await User.findOne();
+if (!user) {
+  user = new User({
+    name: 'Max',
+    email: 'max@test.com',
+    cart: { items: [] },
+  });
+  await user.save();
+}
+```
+
 ## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
 
 ## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
