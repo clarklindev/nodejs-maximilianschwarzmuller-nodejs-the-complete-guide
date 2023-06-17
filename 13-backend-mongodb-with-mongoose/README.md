@@ -52,6 +52,27 @@ module.exports = mongoose.model('Product', productSchema);
 
 - Product.find() returns the actual products (not like mongodb which returns a cursor to products)
 
+## Mongoose .populate() to get full object data using a field
+
+```js
+//here it only returns a the id string as part of what is stored in Product
+const products = await Product.find();
+
+//using populate() it can retrieve full object on the prop that is using a ref by using a prop as reference
+const products = await Product.find().populate('userId');
+```
+
+## Mongoose selective retrieval
+
+- tells mongoose which props to retrieve (selective) or which not to retrieve
+
+```js
+Product.find().select('title price -_id'); //return title, price, not _id
+
+//selective retrieval also works for .populate
+const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
+```
+
 ## Create
 
 - create a default user if no users exist
