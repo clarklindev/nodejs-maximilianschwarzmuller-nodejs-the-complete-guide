@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-// const { getDb } = require('../utils/database');
 
 const getProducts = async (req, res, next) => {
   try {
@@ -26,7 +25,10 @@ exports.getIndex = getProducts;
 exports.getCart = async (req, res, next) => {
   try {
     console.log('req.user: ', req.user);
-    const products = await req.user.getCart();
+    const user = await req.user.populate('cart.items.productId');
+
+    const products = user.cart.items;
+
     res.json({ products });
   } catch (err) {
     console.log(err);
