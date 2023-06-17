@@ -1,8 +1,17 @@
 const Product = require('../models/product');
 
 exports.getProducts = async (req, res, next) => {
+  //Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
+  //Product.find().select('title price -_id'); //return title, price, not _id
+
+  //using populate() it can retrieve full object on the prop that is using a ref by using a prop as reference
+  //const products = await Product.find().populate('userId');
+  //selective retrieval also works for .populate
+  //const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
+
   //get products for current user..
   const products = await Product.find();
+
   res.status(200).json({ products });
 };
 
