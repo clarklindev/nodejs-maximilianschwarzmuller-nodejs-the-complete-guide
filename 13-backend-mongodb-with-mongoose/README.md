@@ -60,6 +60,9 @@ const products = await Product.find();
 
 //using populate() it can retrieve full object on the prop that is using a ref by using a prop as reference
 const products = await Product.find().populate('userId');
+
+//sometimes to get a prmise from .populate you need to call  .execPopulate();
+const products = await Product.find().populate('userId').execPopulate();
 ```
 
 ## Mongoose selective retrieval

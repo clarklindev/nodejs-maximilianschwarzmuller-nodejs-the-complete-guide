@@ -24,6 +24,35 @@ const userSchema = new Schema({
     ],
   },
 });
+userSchema.methods.addToCart = function (product) {
+  //check if it exists in cart
+  const cartProductIndex =
+    this.cart?.items?.findIndex((cartProduct) => {
+      return cartProduct.productId.toString() === product._id.toString();
+    }) ?? -1;
+
+  let newQuantity = 1;
+  const updatedCartItems = this.cart?.items ? [...this.cart.items] : [];
+
+  if (cartProductIndex >= 0) {
+    //already exists
+    newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    //structure of cart items
+    updatedCartItems.push({
+      productId: product._id,
+      quantity: newQuantity,
+    });
+  }
+
+  const updatedCart = {
+    items: updatedCartItems,
+  };
+
+  this.cart = updatedCart;
+  return this.save();
+};
 
 module.exports = mongoose.model('User', userSchema);
 
@@ -42,34 +71,6 @@ module.exports = mongoose.model('User', userSchema);
 //   save() {
 //     const db = getDb();
 //     return db.collection('users').insertOne(this);
-//   }
-
-//   //the User collection only stores references of product and quantity, but we need to get the detailed Product
-//   async getCart() {
-//     const db = getDb();
-
-//     //get just the productIds of items in the cart
-//     const productIds = this.cart.items.map((i) => {
-//       return i.productId;
-//     });
-
-//     //find (products of Product) in cart using productIds
-//     const productsInCart = await db
-//       .collection('products')
-//       .find({ _id: { $in: productIds } })
-//       .toArray(); //search products with these ids - returns array of cursors
-
-//     //use product collection data, in add quantity back to product
-//     const productsInCartWithQuantity = productsInCart.map((p) => {
-//       return {
-//         ...p,
-//         quantity: this.cart.items.find((i) => {
-//           return i.productId.toString() === p._id.toString();
-//         }).quantity,
-//       };
-//     });
-
-//     return productsInCartWithQuantity;
 //   }
 
 //   //this is called when you submit your cart
