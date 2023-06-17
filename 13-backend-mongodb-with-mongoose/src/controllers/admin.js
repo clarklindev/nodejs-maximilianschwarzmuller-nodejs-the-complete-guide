@@ -2,7 +2,7 @@ const Product = require('../models/product');
 
 exports.getProducts = async (req, res, next) => {
   //get products for current user..
-  const products = await Product.fetchAll();
+  const products = await Product.find();
   res.status(200).json({ products });
 };
 
@@ -10,7 +10,7 @@ exports.getProduct = async (req, res, next) => {
   const prodId = req.params.productId;
   try {
     const product = await Product.findById(prodId);
-    res.status(200).json({ product: product });
+    res.status(200).json({ product });
   } catch (err) {
     console.log(err);
     res.status(404).json({ error: err });

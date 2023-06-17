@@ -3,17 +3,16 @@ const Product = require('../models/product');
 
 const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.fetchAll();
+    const products = await Product.find();
     res.status(200).json({ products });
   } catch (err) {
     console.log(err);
   }
 };
 
-const getProduct = async (req, res, next) => {
+exports.getProduct = async (req, res, next) => {
+  const prodId = req.params.productId;
   try {
-    const prodId = req.params.productId;
-    console.log('prodId: ', prodId);
     const product = await Product.findById(prodId);
     res.status(200).json({ product });
   } catch (err) {
@@ -23,7 +22,6 @@ const getProduct = async (req, res, next) => {
 
 exports.getProducts = getProducts;
 exports.getIndex = getProducts;
-exports.getProduct = getProduct;
 
 exports.getCart = async (req, res, next) => {
   try {
