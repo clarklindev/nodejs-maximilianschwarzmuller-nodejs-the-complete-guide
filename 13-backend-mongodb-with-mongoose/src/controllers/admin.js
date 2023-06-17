@@ -29,6 +29,7 @@ exports.addProduct = async (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
+    userId: req.user._id, //or with mongoose: you can reference the entire object req.user and mongoose will get the ._id from there.
   });
 
   try {
