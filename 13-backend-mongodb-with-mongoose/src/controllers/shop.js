@@ -78,6 +78,7 @@ exports.postOrder = async (req, res, next) => {
     });
 
     const result = await order.save();
+    await req.user.clearCart();
 
     res.json({ result, products });
   } catch (err) {
