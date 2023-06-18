@@ -65,29 +65,27 @@ userSchema.methods.deleteFromCart = function (productId) {
   return this.save();
 };
 
-module.exports = mongoose.model('User', userSchema);
-
 //   //this is called when you submit your cart
 //   //you add whats in cart to orders and reset cart.
-//   async addOrder() {
-//     const db = getDb();
-//     const products = await this.getCart();
-//     const order = {
-//       items: products,
-//       user: {
-//         _id: new ObjectId(this._id),
-//         name: this.name,
-//       },
-//     };
-//     await db.collection('orders').insertOne(order);
-//     this.cart = { items: [] }; //clear cart
+// userSchema.methods.addOrder = async function () {
+//   const products = await this.getCart();
+//   const order = {
+//     items: products,
+//     user: {
+//       _id: new ObjectId(this._id),
+//       name: this.name,
+//     },
+//   };
+//   await db.collection('orders').insertOne(order);
+//   this.cart = { items: [] }; //clear cart
+//   const result = await db.collection('users').updateOne(
+//     { _id: new ObjectId(this._id) },
+//     { $set: { cart: { items: [] } } } //replace cart
+//   );
+//   return result;
+// };
 
-//     const result = await db.collection('users').updateOne(
-//       { _id: new ObjectId(this._id) },
-//       { $set: { cart: { items: [] } } } //replace cart
-//     );
-//     return result;
-//   }
+module.exports = mongoose.model('User', userSchema);
 
 //   async getOrders() {
 //     const db = getDb();
