@@ -65,6 +65,17 @@ const products = await Product.find().populate('userId');
 const products = await Product.find().populate('userId').execPopulate();
 ```
 
+## pulling data from only an id string via .\_doc
+
+- via .\_doc then spread the return into an object
+
+```js
+// shop.js
+const products = user.cart.items.map((i) => {
+  return { quantity: i.quantity, product: { ...i.productId._doc } };
+});
+```
+
 ## Mongoose selective retrieval
 
 - tells mongoose which props to retrieve (selective) or which not to retrieve

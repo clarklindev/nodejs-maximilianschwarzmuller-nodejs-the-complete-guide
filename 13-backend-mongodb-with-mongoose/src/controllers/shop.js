@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 const getProducts = async (req, res, next) => {
   try {
@@ -61,8 +62,24 @@ exports.cartDeleteProduct = async (req, res, next) => {
 
 exports.postOrder = async (req, res, next) => {
   try {
-    const result = await req.user.addOrder();
-    res.json({ result });
+    const user = await req.user.populate('cart.items.productId');
+
+    //SEE MODELS for order: order products has object: {product, quantity} props but cart stores {productId, quantity}
+    const products = user.cart.items.map((i) => {
+      return { quantity: i.quantity, product: { ...i.productId._doc } };
+    });
+
+    const order = new Order({
+      user: {
+        name: req.user.name,
+        userId: req.user, //mongoose: here... gets id automatically from the object (user)
+      },
+      products,
+    });
+
+    const result = await order.save();
+
+    res.json({ result, products });
   } catch (err) {
     console.log(err);
   }
