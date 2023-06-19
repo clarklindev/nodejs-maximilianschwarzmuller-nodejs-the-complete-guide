@@ -9,3 +9,13 @@
   align-items: center;
   padding: 10px;
 }
+
+.nav-link {
+  font-weight: bold;
+  color: red;
+  /* Add other styles as needed */
+}
+
+.active {
+  /* Styles for active NavLink */
+}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { useLoaderData, Link } from 'react-router-dom';
+import { useLoaderData, NavLink } from 'react-router-dom';
+import styles from '../../components/Navbar.module.css';
 
 export const Todos = () => {
   const todos = useLoaderData();
@@ -8,9 +9,14 @@ export const Todos = () => {
     <div className='todos'>
       <h2>Todos</h2>
       {todos.map((todo) => (
-        <Link to={todo.id.toString()} key={todo.id}>
+        <NavLink
+          className={styles['nav-link']}
+          activeClassName={styles.active}
+          to={todo.id.toString()}
+          key={todo.id}
+        >
           <p>{todo.title}</p>
-        </Link>
+        </NavLink>
       ))}
     </div>
   );

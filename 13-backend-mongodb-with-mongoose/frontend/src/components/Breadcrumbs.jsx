@@ -1,5 +1,6 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
+import styles from '../components/Navbar.module.css';
 
 export const Breadcrumbs = () => {
   const location = useLocation();
@@ -14,7 +15,13 @@ export const Breadcrumbs = () => {
 
       return (
         <div className='crumb' key={crumb}>
-          <Link to={currentLink}>{crumb}</Link>
+          <NavLink
+            className={styles['nav-link']}
+            activeClassName={styles.active}
+            to={currentLink}
+          >
+            {crumb}
+          </NavLink>
         </div>
       );
     });
