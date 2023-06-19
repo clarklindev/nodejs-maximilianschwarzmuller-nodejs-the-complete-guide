@@ -1,0 +1,10 @@
+.form{
+  display: inline-flex;
+  flex-direction: column;
+  
+}
+
+.form label{
+  display:flex;
+  flex-direction:column;
+}

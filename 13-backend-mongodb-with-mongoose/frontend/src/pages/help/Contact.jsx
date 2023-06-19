@@ -1,12 +1,14 @@
 import React from 'react';
 import { Form, redirect, useActionData } from 'react-router-dom';
+import styles from './Contact.module.css';
+
 export const Contact = () => {
   const data = useActionData();
 
   return (
     <>
       <h3>Contact</h3>
-      <Form className='form' method='post' action='/help/contact'>
+      <Form className={styles.form} method='post' action='/help/contact'>
         <label>
           <span>your email:</span>
           <input type='email' name='email' required />
