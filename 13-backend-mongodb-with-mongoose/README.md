@@ -199,3 +199,7 @@ localhost:3000/cart
 http://localhost:3000/admin/add-product
 http://localhost:3000/create-order
 ```
+
+## session / cookie
+
+read notes - cookies and sessions (auth).md
