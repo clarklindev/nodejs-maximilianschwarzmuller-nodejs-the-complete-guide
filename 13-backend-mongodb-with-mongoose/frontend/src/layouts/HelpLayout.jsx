@@ -1,6 +1,5 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import styles from '../components/Navbar.module.css';
 
 export const HelpLayout = () => {
   return (
@@ -9,18 +8,10 @@ export const HelpLayout = () => {
       <p>lorem ipsum</p>
 
       <nav>
-        <NavLink
-          className={styles['nav-link']}
-          activeClassName={styles.active}
-          to='faq'
-        >
+        <NavLink className='nav-link' activeClassName='active' to='faq'>
           faq
         </NavLink>
-        <NavLink
-          className={styles['nav-link']}
-          activeClassName={styles.active}
-          to='contact'
-        >
+        <NavLink className='nav-link' activeClassName='active' to='contact'>
           contact us
         </NavLink>
       </nav>
