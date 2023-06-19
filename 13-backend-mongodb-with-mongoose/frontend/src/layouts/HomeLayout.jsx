@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Navbar } from '../components/Navbar';
+import styles from './HomeLayout.module.css';
 
 export const HomeLayout = () => {
   return (
@@ -29,7 +30,7 @@ export const HomeLayout = () => {
       </Navbar>
       <Breadcrumbs />
 
-      <main>
+      <main className={styles.main}>
         <Outlet />
       </main>
     </>
