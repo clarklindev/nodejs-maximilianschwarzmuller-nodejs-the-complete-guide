@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import styles from '../components/Navbar.module.css';
 
 export const About = () => {
   const [user, setUser] = useState('swagfinger');
 
   if (!user) {
     //disable history - prevents going back
-    return <Navigate to='/' replace={true} />;
+    return (
+      <NavLink
+        className={styles['nav-link']}
+        activeClassName={styles.active}
+        to='/'
+        replace={true}
+      />
+    );
   }
 
   return (
