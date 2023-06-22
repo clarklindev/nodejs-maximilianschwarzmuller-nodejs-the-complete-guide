@@ -1,6 +1,7 @@
-import styles from './Login.module.css';
+import styles from './SignUp.module.css';
 import { NavLink } from 'react-router-dom';
-export const Login = () => {
+
+export const SignUp = () => {
   return (
     <div className={styles.wrapper}>
       <form className={styles['form']} action='' method='POST'>
@@ -12,11 +13,14 @@ export const Login = () => {
           <label for='password'>Password</label>
           <input type='password' name='password' id='password' />
         </div>
-
+        <div className={styles['form-control']}>
+          <label for='confirmPassword'>Confirm password</label>
+          <input type='password' name='confirmPassword' id='confirmPassword' />
+        </div>
         <div className={styles['form-buttons']}>
-          <button type='submit'>Login</button>
+          <button type='submit'>Sign up</button>
           <div>
-            Don't have an account? <NavLink to='/signup'>Sign up</NavLink>
+            account already exists? <NavLink to='/login'>Login</NavLink>
           </div>
         </div>
       </form>
