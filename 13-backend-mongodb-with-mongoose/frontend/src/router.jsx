@@ -22,6 +22,7 @@ import { TodoError } from './pages/todos/TodoError';
 import { Faq } from './pages/help/Faq';
 import { Contact, contactAction } from './pages/help/Contact';
 import { Login } from './pages/Login';
+import { SignUp } from './pages/SignUp';
 
 // Configure nested routes with JSX
 export const router = createBrowserRouter(
@@ -36,6 +37,7 @@ export const router = createBrowserRouter(
       </Route>
 
       <Route path='login' element={<Login />} />
+      <Route path='signup' element={<SignUp />} />
 
       <Route
         path='todos'
