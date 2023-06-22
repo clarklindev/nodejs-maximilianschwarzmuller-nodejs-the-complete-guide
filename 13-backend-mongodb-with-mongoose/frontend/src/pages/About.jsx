@@ -9,8 +9,7 @@ export const About = () => {
     //disable history - prevents going back
     return (
       <NavLink
-        className={styles['nav-link']}
-        activeClassName={styles.active}
+        className={({ isActive }) => `nav-link ${isActive && 'active'}`}
         to='/'
         replace={true}
       />
