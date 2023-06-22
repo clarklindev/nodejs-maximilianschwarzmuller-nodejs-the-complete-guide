@@ -9,21 +9,36 @@ export const HomeLayout = () => {
     <>
       <Navbar>
         <div>
-          <NavLink className='nav-link' activeClassName='active' to='/'>
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='/'
+          >
             Home
           </NavLink>
-          <NavLink className='nav-link' activeClassName='active' to='about'>
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='about'
+          >
             About
           </NavLink>
-          <NavLink className='nav-link' activeClassName='active' to='help'>
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='help'
+          >
             Help
           </NavLink>
-          <NavLink className='nav-link' activeClassName='active' to='todos'>
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='todos'
+          >
             Todos
           </NavLink>
         </div>
         <div>
-          <NavLink className='nav-link' activeClassName='active' to='login'>
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='login'
+          >
             Login
           </NavLink>
         </div>

@@ -1,15 +1,15 @@
 import styles from './Login.module.css';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Form, useActionData, redirect } from 'react-router-dom';
 export const Login = () => {
   return (
     <div className={styles.wrapper}>
-      <form className={styles['form']} action='' method='POST'>
+      <Form className={styles['form']} action='/login' method='POST'>
         <div className={styles['form-control']}>
-          <label for='email'>Email</label>
+          <label htmlFor='email'>Email</label>
           <input type='email' name='email' id='email' />
         </div>
         <div className={styles['form-control']}>
-          <label for='password'>Password</label>
+          <label htmlFor='password'>Password</label>
           <input type='password' name='password' id='password' />
         </div>
 
@@ -19,7 +19,19 @@ export const Login = () => {
             Don't have an account? <NavLink to='/signup'>Sign up</NavLink>
           </div>
         </div>
-      </form>
+      </Form>
     </div>
   );
+};
+
+export const loginAction = async ({ request }) => {
+  const data = await request.formData();
+
+  const submission = {
+    email: data.get('email'),
+    password: data.get('password'),
+  };
+
+  console.log('submission: ', submission);
+  return redirect('/');
 };

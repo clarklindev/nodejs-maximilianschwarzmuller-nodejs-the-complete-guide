@@ -10,8 +10,7 @@ export const Todos = () => {
       <h2>Todos</h2>
       {todos.map((todo) => (
         <NavLink
-          className={styles['nav-link']}
-          activeClassName={styles.active}
+          className={({ isActive }) => `nav-link ${isActive && 'active'}`}
           to={todo.id.toString()}
           key={todo.id}
         >

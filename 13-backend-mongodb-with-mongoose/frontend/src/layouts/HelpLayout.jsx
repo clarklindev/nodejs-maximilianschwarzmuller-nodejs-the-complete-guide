@@ -8,10 +8,16 @@ export const HelpLayout = () => {
       <p>lorem ipsum</p>
 
       <nav>
-        <NavLink className='nav-link' activeClassName='active' to='faq'>
+        <NavLink
+          className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+          to='faq'
+        >
           faq
         </NavLink>
-        <NavLink className='nav-link' activeClassName='active' to='contact'>
+        <NavLink
+          className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+          to='contact'
+        >
           contact us
         </NavLink>
       </nav>
