@@ -1,0 +1,21 @@
+.nav{
+  display:flex;
+  gap: 5px 0;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.nav-link {
+  color: black;
+  /* Add other styles as needed */
+  margin: 15px;
+  text-decoration: none;
+
+}
+
+.active {
+  /* Styles for active NavLink */
+  color: red;
+  text-decoration: none;
+}
+

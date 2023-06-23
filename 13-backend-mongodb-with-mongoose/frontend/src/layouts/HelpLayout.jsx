@@ -1,21 +1,23 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import styles from './HelpLayout.module.css';
 
 export const HelpLayout = () => {
   return (
     <div>
-      <h2>Help</h2>
-      <p>lorem ipsum</p>
-
-      <nav>
+      <nav className={styles.nav}>
         <NavLink
-          className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+          className={({ isActive }) => {
+            styles['nav-link'];
+          }}
           to='faq'
         >
           faq
         </NavLink>
         <NavLink
-          className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+          className={({ isActive }) => {
+            styles['nav-link'];
+          }}
           to='contact'
         >
           contact us
