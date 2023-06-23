@@ -7,17 +7,21 @@ export const HelpLayout = () => {
     <div>
       <nav className={styles.nav}>
         <NavLink
-          className={({ isActive }) => {
-            styles['nav-link'];
-          }}
+          className={({ isActive }) =>
+            isActive
+              ? `${styles['nav-link']} ${styles['active']}`
+              : styles['nav-link']
+          }
           to='faq'
         >
           faq
         </NavLink>
         <NavLink
-          className={({ isActive }) => {
-            styles['nav-link'];
-          }}
+          className={({ isActive }) =>
+            isActive
+              ? `${styles['nav-link']} ${styles['active']}`
+              : styles['nav-link']
+          }
           to='contact'
         >
           contact us
