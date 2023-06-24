@@ -2,7 +2,8 @@ const User = require('../models/user');
 
 exports.getLogin = (req, res, next) => {
   // access session cookie
-  console.log(req.session.isLoggedIn);
+  console.log('loggedin: ', req.session.isLoggedIn);
+  res.json({ isLoggedIn: req.session.isLoggedIn });
 };
 
 exports.postLogin = async (req, res, next) => {
@@ -17,6 +18,7 @@ exports.postLogin = async (req, res, next) => {
       //ensure session was created before redirect()
       res.redirect('/');
     });
+    res.json({ done: true });
   } catch (err) {
     console.log(err);
     throw err;

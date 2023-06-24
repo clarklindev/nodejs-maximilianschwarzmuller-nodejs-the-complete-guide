@@ -1,9 +1,10 @@
 import React from 'react';
 import { Form, redirect, useActionData } from 'react-router-dom';
 import styles from './Contact.module.css';
-
+import { useHttpClient } from '../../shared/hooks/http-hook';
 export const Contact = () => {
   const data = useActionData();
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   return (
     <>
@@ -31,16 +32,20 @@ export const contactAction = async ({ request }) => {
 
   const data = await request.formData();
 
-  const submission = {
-    email: data.get('email'),
-    message: data.get('message'),
-  };
-
-  console.log(submission);
-
   //send post request
   if (submission.message.length < 10) {
     return { error: 'message must be over 10 chars long' };
+  }
+
+  try {
+    const response = await sendRequest(
+      'http:localhost:3000/contacts',
+      'POST',
+      data
+    );
+    console.log('FRONTEND response:', response);
+  } catch (err) {
+    console.log(err);
   }
 
   //redirect user
