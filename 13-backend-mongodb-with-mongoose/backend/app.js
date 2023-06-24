@@ -32,21 +32,27 @@ const User = require('./src/models/user');
 const adminRoutes = require('./src/routes/admin');
 const shopRoutes = require('./src/routes/shop');
 const authRoutes = require('./src/routes/auth');
+const contactRoutes = require('./src/routes/contact');
 
 // const errorController = require('./src/controllers/error');
 
-app.use((req, res, next) => {
-  if (!req.session.user) {
+app.use(async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      return next();
+    }
+    const user = await User.findById(req.session.user._id);
+    req.user = user;
     next();
+  } catch (err) {
+    console.log(err);
   }
-  const user = User.findById(req.session.user._id);
-  req.user = user;
-  next();
 });
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
+app.use(contactRoutes);
 // app.use(errorController.get404);
 
 const startConnection = async () => {
