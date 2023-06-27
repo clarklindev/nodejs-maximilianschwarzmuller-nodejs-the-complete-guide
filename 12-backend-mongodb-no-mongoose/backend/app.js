@@ -20,7 +20,7 @@ const shopRoutes = require('./src/routes/shop');
 //adds .user to req
 app.use(async (req, res, next) => {
   try {
-    const user = await User.findById('648bac5406105f612075b996');
+    const user = await User.findById('648d9b2926121ba0bf431eed');
     req.user = new User(user.name, user.email, user.cart, user._id);
     next();
   } catch (err) {
