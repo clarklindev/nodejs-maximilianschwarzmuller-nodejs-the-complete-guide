@@ -7,13 +7,17 @@
     "start": "nodemon app.js"
   },
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "connect-mongodb-session": "^3.1.1",
     "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "mongodb": "^5.6.0",
-    "mongoose": "^7.3.0"
+    "mongoose": "^7.3.0",
+    "nodemailer": "^6.9.3",
+    "nodemailer-sendgrid-transport": "^0.2.0"
   },
   "keywords": [],
   "author": "",

@@ -116,9 +116,9 @@ if (!user) {
 }
 ```
 
-## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
+## <!----------------------------------------------------------------------------------------->
 
-## <!-- -------------------------------------------------------------------------------------------------------------------------- -->
+## <!----------------------------------------------------------------------------------------->
 
 # backend - mongodb - no mongoose
 
@@ -179,27 +179,337 @@ mongodb uses '.\_id' as opposed to '.id'
 
 ## Routes
 
-```
-GET
-localhost:3000/
-localhost:3000/products/648bc4cb2847b619c52d4414
-localhost:3000/admin/products/648bc4cb2847b619c52d4414
-localhost:3000/cart
-localhost:3000/orders
+see "backend/routes/"
 
-PUT
-http://localhost:3000/admin/edit-product/648bc4cb2847b619c52d4414
+### route protection
 
-DELETE
-localhost:3000/admin/products/648bc4cb2847b619c52d4414
-localhost:3000/cart-delete-item
+- using middleware to protect routes (see middleware/is-auth.js)
+- add middleware function to routes - the execution goes, left to right (ie isAuth executes before adminController.addProduct)
 
-POST
-localhost:3000/cart
-http://localhost:3000/admin/add-product
-http://localhost:3000/create-order
+```js
+// middleware:
+//is-auth.js
+module.exports = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect('/login');
+  }
+  next();
+};
 ```
 
-## session / cookie
+```js
+const isAuth = require('../middleware/is-auth');
 
-read notes - cookies and sessions (auth).md
+router.post('/add-product', isAuth, adminController.addProduct);
+```
+
+## CSRF (Cross Site Request Forgery)
+
+- prevent malicious code execution which uses valid session (eg link in email to use your credentials), then gain access to your api's
+- OPENAI:
+  Cross-Site Request Forgery (CSRF) protection is primarily required when you have a server-side component handling user requests, such as when using traditional server-rendered web applications or APIs. If you're not using server-side rendering and your application is entirely client-side, the need for CSRF tokens may not be as critical.
+
+### prevent CSRF with CSRF token
+
+- how does it work?
+
+- want to prevent your sessions being stolen,
+- csurf is a package for node/express which generates a csrf token.
+
+- a new token is generated for every request
+- can be embedded onto pages/forms that do something to change users state - then on backend we check if there is the valid token.
+- it uses the session (default) to store the token
+- add after session()
+- Typically, res.locals is used within server-side rendering frameworks to pass variables to templates or views during the rendering process.
+- use middleware, store in res.locals like:
+  - res.locals.isAuthenticated = req.session.isLoggedIn;
+  - res.locals.csrfToken = req.csrfToken();
+- NOTE: for POST req - need to add to form input (hidden) giving access to csrfToken
+
+```
+<input type="hidden" name="_csrf" value={${csrfToken}}>
+```
+
+```shell
+npm i csurf
+```
+
+```js
+const csrf = require('csurf');
+const csrfProtection = csrf(); //middleware
+
+app.use(
+  session({
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
+
+app.use(csrfProtection);
+...
+
+//SERVER SIDE RENDER...for every request - set local variables to pass into views
+
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+```
+
+---
+
+### session / cookie
+
+read notes - authentication - cookies and sessions (authentication).md
+
+# Cookies / Sessions
+
+## Session
+
+- with sessions - session is created, cookie stores hashed ID of session - server can confirm id stored in cookie relates to something in db
+- session shares information accross all requests of the same user.
+- cookie lasts the session while browser tab is open
+- session data is stored in memory but should be stored in db (express-session) can store using connect-mongodb-session (for production build)
+
+```
+npm i express-session connect-mongodb-session
+
+```
+
+- session should then be initialzed as early middleware
+- secret - used to hash - long string.
+- resave:false - session saved only when something changed in session
+- saveUninitialized:false - the session cookie will not be set on the browser unless the session is modified
+
+```js
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
+const MONGODB_URI =  `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@<somemongodb given db url>`,
+
+const store = new MongoDBStore({
+  uri: MONGODB_URI,
+  collection: 'sessions',
+});
+
+//app.js
+app.use(
+  session({
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
+```
+
+### Session cookie - identifying the session
+
+set cookie on session - accessed via controllers using "req.session."
+
+```js
+//in the controllers
+exports.login = (req, res, next) => {
+  req.session.isLoggedIn = true; //sets the cookie via session
+};
+```
+
+<!-- ------------------------------------------------------------------------------ -->
+
+## Cookie
+
+- cookies are not safe!!! can be used but it is not safe as they can be manipulated in browser tools via hardcoding cookie values
+- setting cookies manually (chrome dev tools => Application=> Storage => cookies)
+- ALTERNATIVE to storing cookies on backend is using sessions (stored on backend in db or in memory) - client tells server which session he belongs
+
+- Secure - cookie set only when using https url
+- HttpOnly - cookie cant be accessed via client side javascript to read cookie values
+- resave -
+  determines whether the session should be saved to the session store even if the session was not modified during the request. By setting resave to false, you are indicating that the session should not be saved if it was not modified. This can help optimize performance by avoiding unnecessary writes to the session store.
+
+- saveUninitialized -
+  determines whether a new, uninitialized session should be saved to the session store. An uninitialized session is a session that is new but hasn't been modified yet. By setting saveUninitialized to false, you are indicating that uninitialized sessions should not be saved. This can be useful to save storage space and reduce the number of unnecessary session objects in the session store.
+
+In summary, by setting resave and saveUninitialized to false, you are optimizing the session middleware to only save the session if it has been modified and to skip saving uninitialized sessions. This can improve performance and efficiency.
+
+- set a cookie in header response like:
+
+<!-- how to set/get a cookie -->
+
+```js
+//set
+exports.postLogin = (req, res, next) => {
+  // res.setHeader('Set-Cookie', 'loggedIn=true; Secure'); //cookie is only set with https connections
+  // res.setHeader('Set-Cookie', 'loggedIn=true; HttpOnly'); //cookie cant be accessed via clientside javascript
+  res.setHeader('Set-Cookie', 'loggedIn=true');
+
+  res.redirect('/');
+};
+
+// get
+exports.getLogin = (req, res, next) => {
+  const isLoggedIn = req.get('Cookie').split(';')[1].trim().split('=')[1];
+};
+```
+
+## destroy() session
+
+```js
+exports.postLogout = async (req, res, next) => {
+  // clear session
+  // callback with potential error as prop
+  req.session.destroy((err) => {
+    console.log(err);
+    res.redirect('/');
+  });
+};
+```
+
+---
+
+# authentication in nodejs
+
+## CREATE USER - SIGNUP
+
+```shell
+npm i bcryptjs
+```
+
+```js
+const bcrypt = require('bcryptjs');
+
+exports.postSignup = async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      return res.json({ status: 'FAIL', data: 'User already exists' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (rounds of hashing to be applied (12) is a secure number)
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      cart: { items: [] },
+    });
+    await newUser.save();
+    res.json({ status: 'OK', data: 'successfully created new user' });
+  } catch (err) {
+    console.log(err);
+  }
+};
+```
+
+## LOGIN USER
+
+- take password entered in form and let bcrypt "hash" it and see if it will equal the stored hash value
+
+```js
+const user = await User.findOne({ email: email });
+if (!user) {
+  return res.json({ error: 'user does not exist' });
+}
+
+try {
+  const result = await bcrypt.compare(password, user.password); //compare password user entered..
+  //the result of compare() is a promise where it returns 'true' if equal and 'false' if not equal.
+  if (result) {
+    req.session.isLoggedIn = true;
+    req.session.user = user;
+
+    return req.session.save((err) => {
+      console.log(err);
+      //ensure session was created before redirect()
+      // res.redirect('/');
+      res.json({ status: 'LOGGED IN', done: true });
+    });
+  }
+  res.json({ status: 'ERROR', message: 'incorrect credentials' });
+} catch (err) {
+  console.log(err);
+}
+```
+
+## using gmail to send email (working recommended)
+
+- using an app password = https://myaccount.google.com/apppasswords
+- you generate a password to bypass 2factor auth, save in .env
+
+- https://stackoverflow.com/questions/60701936/error-invalid-login-application-specific-password-required/60718806#60718806
+
+```js
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
+```
+
+## AWS - ses
+
+- aws offers FREE simple emailing service which allows 60k outbound emails a month
+
+https://aws.amazon.com/ses/pricing/
+
+## Sendgrid to send emails
+
+- on Sendgrids website...
+
+```js
+//template code
+
+// using Twilio SendGrid's v3 Node.js Library
+// https://github.com/sendgrid/sendgrid-nodejs
+// javascript;
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const msg = {
+  to: 'test@example.com', // Change to your recipient
+  from: 'test@example.com', // Change to your verified sender
+  subject: 'Sending with SendGrid is Fun',
+  text: 'and easy to do anywhere, even with Node.js',
+  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+};
+sgMail
+  .send(msg)
+  .then(() => {
+    console.log('Email sent');
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+```
+
+### tutorial: nodejs-maximilianschwarzmuller-nodejs-the-complete-guide
+
+- section 16: sending emails uses:
+  - nodemailer
+  - nodemailer-sendgrid-transport
+
+```js
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(
+  sendgridTransport({
+    auth: {
+      api_key: 'API_KEY',
+    },
+  })
+);
+
+...
+// then use
+transporter.sendMail({to:"WHO"});
+
+```
