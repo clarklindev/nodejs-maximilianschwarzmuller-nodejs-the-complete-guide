@@ -71,7 +71,7 @@ exports.postOrder = async (req, res, next) => {
 
     const order = new Order({
       user: {
-        name: req.user.name,
+        email: req.user.name,
         userId: req.user, //mongoose: here... gets id automatically from the object (user)
       },
       products,
