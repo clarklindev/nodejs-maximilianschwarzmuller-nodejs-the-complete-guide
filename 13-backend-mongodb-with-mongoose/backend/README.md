@@ -513,3 +513,61 @@ const transporter = nodemailer.createTransport(
 transporter.sendMail({to:"WHO"});
 
 ```
+
+## password reset
+
+- nodejs crypto library
+
+```js
+const crypto = require('crypto');
+
+//callback with error or buffer
+crypto.randomBytes(32, (err, buffer) => {
+  if (err) {
+    return res.redirect('/reset');
+  }
+});
+```
+
+---
+
+## steps for api's
+
+1. create new user (signup) since no user exists in db
+
+/auth/signup
+
+2. then you can do login things
+
+/auth/login (GET) - checks if you are logged-in
+/auth/login (POST) - actually logs in
+/auth/login (GET) - verify you are logged in after logging in
+
+/auth/logout (POST) - logs out
+
+3. CLIENT-SIDE: so the user forgot their password and now wants to reset.. they click forgot password link
+
+- lands on page requesting email address... then user types in email and clicks SEND!
+
+4. /auth/reset (POST)
+
+- this is after user enters email in form and sends the form.
+- the email enterered receives a reset email if user with matching exists
+- in the email is a link (with a token)
+- resetToken and resetTokenExpiration is added for user..
+
+5. CLIENT-SIDE:
+
+- user click on link in email
+- user lands on a page with only a "enter new password" and send button
+
+6. /reset/:token (POST)
+
+- url has token
+- params.body has .password
+- on BACKEND we ensure there is a user with this token thats passed in AND the token is still valid
+- if there is a user, we encrypt the new password and save user updates.
+- reset resetToken and resetTokenExperiration
+- now user can log in with new password
+
+---

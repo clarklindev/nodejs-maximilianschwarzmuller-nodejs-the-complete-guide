@@ -77,8 +77,8 @@ app.use(async (req, res, next) => {
 // });
 
 app.use('/admin', adminRoutes);
-app.use(shopRoutes);
-app.use(authRoutes);
+app.use('/shop', shopRoutes);
+app.use('/auth', authRoutes);
 // app.use(errorController.get404);
 
 const startConnection = async () => {
