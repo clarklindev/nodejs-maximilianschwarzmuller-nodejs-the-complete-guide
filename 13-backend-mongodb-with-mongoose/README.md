@@ -10,5 +10,3 @@ https://www.udemy.com/course/nodejs-the-complete-guide
 16. sending emails
 
 17. advanced authentication
-
-18. understanding validation
