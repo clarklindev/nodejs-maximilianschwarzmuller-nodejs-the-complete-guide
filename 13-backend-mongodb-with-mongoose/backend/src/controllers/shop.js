@@ -3,7 +3,7 @@ const Order = require('../models/order');
 
 const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({ userId: req.user._id });
     res.status(200).json({ products });
   } catch (err) {
     console.log(err);

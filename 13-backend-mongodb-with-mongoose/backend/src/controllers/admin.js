@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
 
 exports.getProducts = async (req, res, next) => {
@@ -10,7 +11,7 @@ exports.getProducts = async (req, res, next) => {
   //const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
 
   //get products for current user..
-  const products = await Product.find();
+  const products = await Product.find({ userId: req.user._id });
 
   res.status(200).json({ products });
 };
@@ -59,6 +60,13 @@ exports.editProduct = async (req, res, next) => {
 
   try {
     const product = await Product.findById(prodId);
+
+    //check if loggedin user is allowed to edit product
+    if (product.userId.toString() !== req.user._id.toString()) {
+      //redirect away or return status message
+      return res.json({ status: 'user not allowed to edit product' });
+    }
+
     product.title = updatedTitle;
     product.price = updatedPrice;
     product.description = updatedDesc;
@@ -73,8 +81,13 @@ exports.editProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
   const prodId = req.params.productId;
+
   try {
-    const result = await Product.deleteFromCart(prodId);
+    const result = await Product.deleteOne({
+      _id: prodId,
+      userId: req.user._id, //extra check that the product.userId must be the same the req.user._id (loggedin user's id)
+    });
+
     res.json({ status: 'PRODUCT DELETED', result });
   } catch (err) {
     console.log(err);

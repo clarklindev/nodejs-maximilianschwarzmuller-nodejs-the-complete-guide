@@ -35,6 +35,7 @@ export const signupAction = async ({ request }) => {
   const submission = {
     email: data.get('email'),
     password: data.get('password'),
+    confirmPassword: data.get('confirmPassword'),
   };
 
   console.log('submission: ', submission);
