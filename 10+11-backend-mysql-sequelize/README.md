@@ -195,7 +195,6 @@ const sequelize = require('./src/utils/database');
 sequelize
   .sync()
   .then((result) => {
-    // console.log('result: ', result);
     app.listen(3000);
   })
   .catch((err) => {

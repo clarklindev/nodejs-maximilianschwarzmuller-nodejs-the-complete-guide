@@ -1,10 +1,13 @@
-const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+import { NextFunction, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
-let transporter; // Declare the transporter variable outside the function
+import User from '../models/user';
 
+let transporter:nodemailer.Transporter; // Declare the transporter variable outside the function
+
+//function preps mailer to send emails
 const getTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
@@ -18,69 +21,71 @@ const getTransporter = () => {
   return transporter;
 };
 
-exports.getLogin = (req, res, next) => {
+export const getLogin = (req:Request, res:Response, next:NextFunction) => {
   // access session cookie
-  console.log('loggedin: ', req.session.isLoggedIn);
-  res.json({ status: 'STATUS', loggedIn: !!req.session.isLoggedIn });
+  try{
+    if(req.session){
+      res.json({ status: 'STATUS', loggedIn: !! req.session.isLoggedIn });
+    }
+  }catch(err){
+    console.log(err);
+  }
+
 };
 
-exports.postLogin = async (req, res, next) => {
+//try log in
+export const postLogin = async (req:Request, res:Response, next:NextFunction) => {
   const email = req.body.email;
   const password = req.body.password;
 
   try {
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.json({ error: 'user does not exist' });
+      return res.status(422).json({ error: 'user does not exist' });
     }
 
     //compare password user entered..
     //the result of compare() is a promise where it returns true if equal and false if not equal.
-    try {
-      const result = await bcrypt.compare(password, user.password);
-      if (result) {
-        req.session.isLoggedIn = true;
-        req.session.user = user;
+    const result = await bcrypt.compare(password, user.password);
+    if (result && req.session) {
+      req.session.isLoggedIn = true;
+      req.session.user = user;
 
-        return req.session.save((err) => {
-          console.log(err);
-          //ensure session was created before redirect()
-          // res.redirect('/');
-          res.json({ status: 'LOGGED IN', done: true });
-        });
-      }
-      res.json({ status: 'ERROR', message: 'incorrect credentials' });
-    } catch (err) {
-      console.log(err);
+      return req.session.save((err:Error) => {
+        console.log(err);
+        //ensure session was created before redirect()
+        // res.redirect('/');
+        res.json({ status: 'LOGGED IN', done: true });
+      });
     }
+    res.json({ status: 'ERROR', message: 'incorrect credentials' });
+    
   } catch (err) {
     console.log(err);
     throw err;
   }
 };
 
-exports.postLogout = async (req, res, next) => {
+export const postLogout = async (req:Request, res:Response, next:NextFunction) => {
   // clear session
   // callback with potential error as prop
-  req.session.destroy((err) => {
-    if (err) {
-      console.log(err);
-      return res.json({ status: 'error', message: err });
-    }
-    res.json({ loggedIn: 'false' });
-  });
+  if(req.session){
+    req.session.destroy((err:Error) => {
+      if (err) {
+        console.log(err);
+        return res.json({ status: 'error', message: err });
+      }
+      res.json({ loggedIn: 'false' });
+    });
+  }
+
 };
 
-exports.postSignup = async (req, res, next) => {
+export const postSignup = async (req:Request, res:Response, next:NextFunction) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
 
   try {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      return res.json({ status: 'FAIL', data: 'User already exists' });
-    }
     const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
     const newUser = new User({
       email,
@@ -98,12 +103,12 @@ exports.postSignup = async (req, res, next) => {
         to: email,
         from: {
           name: 'Clark',
-          address: process.env.GMAIL_USER,
+          address: process.env.GMAIL_USER!,
         },
         subject: 'signup succeeded',
         html: '<h1>you successfully signed up</h1>',
       },
-      (err, info) => {
+      (err: Error | null, info:any) => {
         console.log(info);
       }
     );
@@ -117,7 +122,7 @@ exports.postSignup = async (req, res, next) => {
   });
 };
 
-exports.postResetPassword = (req, res, next) => {
+export const postResetPassword = (req:Request, res:Response, next:NextFunction) => {
   //callback with error or buffer
 
   crypto.randomBytes(32, async (err, buffer) => {
@@ -146,14 +151,12 @@ exports.postResetPassword = (req, res, next) => {
           ? process.env.DEVELOPMENT_URL
           : process.env.PRODUCTION_URL;
 
-      console.log('domainUrl: ', domainUrl);
-
       getTransporter().sendMail(
         {
           to: req.body.email,
           from: {
             name: 'Clark',
-            address: process.env.GMAIL_USER,
+            address: process.env.GMAIL_USER!,
           },
           subject: 'password reset',
           html: `<p>you requested a password reset</p>
@@ -177,7 +180,7 @@ exports.postResetPassword = (req, res, next) => {
 //user enters new password, which is sent as a form post
 // at this stage the password reset has already been requested and the user has clicked on the link received in the email
 //AND user has entered new password and sent the form..which is now handled by this function.
-exports.postNewPassword = async (req, res, next) => {
+export const postNewPassword = async (req:Request, res:Response, next:NextFunction) => {
   const token = req.params.token;
 
   //new password
@@ -196,8 +199,8 @@ exports.postNewPassword = async (req, res, next) => {
   try {
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     user.password = hashedPassword;
-    user.resetToken = null;
-    user.resetTokenExpiration = null;
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
     const result = await user.save();
     res.json({ status: result });
   } catch (err) {

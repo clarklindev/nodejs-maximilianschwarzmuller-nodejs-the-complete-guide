@@ -571,3 +571,35 @@ crypto.randomBytes(32, (err, buffer) => {
 - now user can log in with new password
 
 ---
+
+## validation
+
+- you want to validate (non-get) routes. ie (routes that post something)
+  - using express validator - https://express-validator.github.io/docs/guides/getting-started
+  - express-validator is a wrapper around validator.js
+  - then to add validation to a route, you can add extra middleware
+- check takes a form field "name" or array of field names to check
+- and then you can call a bunch of methods on the check() eg. isEmail()
+- then in the controller, you can call the other part of the middleware which gets the results of any errors in validationResult and stores it in errors const which we define.
+
+```shell
+npm install express-validator
+```
+
+```js
+// routes/auth.js
+const { check } = require('express-validator/check');
+router.post('/signup', check('email').isEmail(), authController.postSignup);
+```
+
+```js
+//controllers/auth.js
+const { validationResult } = require('express-validator/check');
+
+exports.postSignup = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json(error: errors.array()[0].msg);
+  }
+};
+```
