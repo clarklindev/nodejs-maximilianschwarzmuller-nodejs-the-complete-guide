@@ -23,7 +23,6 @@ class Product {
     else {
       result = await db.collection('products').insertOne(this);
     }
-    console.log('result: ', result);
     return result;
   }
 
@@ -56,7 +55,6 @@ class Product {
       const db = getDb();
       const query = { _id: new mongodb.ObjectId(productId) };
       const result = await db.collection('products').deleteOne(query);
-      console.log('result: ', result);
       return result;
     } catch (err) {
       console.log(err);

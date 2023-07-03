@@ -41,7 +41,6 @@ exports.postCart = async (req, res, next) => {
   try {
     const product = await Product.findById(prodId);
     const result = await req.user.addToCart(product);
-    console.log('result: ', result);
     res.json({ result });
   } catch (err) {
     console.log(err);
