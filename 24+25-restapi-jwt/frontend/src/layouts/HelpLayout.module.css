@@ -1,0 +1,19 @@
+.nav{
+  display:flex;
+  gap: 5px 10px;
+  margin-bottom: 20px;
+}
+
+.nav-link {
+  color: black;
+  /* Add other styles as needed */
+  text-decoration: none;
+}
+
+
+.active {
+  /* Styles for active NavLink */
+  color: red;
+  text-decoration: none;
+}
+
