@@ -5,7 +5,6 @@ import { useParams, useLoaderData } from 'react-router-dom';
 export const ProductDetails = () => {
   //2. consume loader data
   const { product } = useLoaderData();
-  console.log('product: ', product);
   return (
     <div className='product-details'>
       <h2>Product Details</h2>
@@ -20,7 +19,11 @@ export const ProductDetails = () => {
 //1. loader function
 export const productDetailsLoader = async ({ params }) => {
   const { productId } = params;
-  const res = await fetch(`http://localhost:3000/admin/products/${productId}`);
+  const res = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}:${
+      import.meta.env.VITE_PORT
+    }/products/${productId}`
+  );
   if (!res.ok) {
     throw Error('Could not find that ID');
   }

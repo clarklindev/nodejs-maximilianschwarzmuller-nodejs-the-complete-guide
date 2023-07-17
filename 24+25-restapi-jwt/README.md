@@ -58,6 +58,7 @@ import { Form, redirect } from 'react-router-dom';
 - if you use {storage:} you can configure an object which takes "destination" and "filename"
 - multer.diskStorage configuration, when you set the destination as 'images', it specifies that uploaded files will be saved in the images folder relative to the current working directory. As long as the folder exists, multer will be able to access and save the uploaded files to that location.
 - note you cant use .ISOString() as filename because it contains ':' chars
+- you can add a filter to accept only certain filetypes with 'fileFilter', and a callback that returns true to accept / or returns false to deny file.
 
 ```js
 // BACKEND - index.tsx
@@ -73,7 +74,9 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-app.use(multer({ storage: fileStorage }).single('upload')); //the param name single('<param>') MUST be the same as on form input for upload
+const fileFilter = (req, file, cb);
+
+app.use(multer({ storage: fileStorage, fileFilter }).single('upload')); //the param name single('<param>') MUST be the same as on form input for upload
 
 // app.use(multer({ dest: 'images' }).single('upload')); //the param name single('<param>') MUST be the same as on form input for upload
 ```
