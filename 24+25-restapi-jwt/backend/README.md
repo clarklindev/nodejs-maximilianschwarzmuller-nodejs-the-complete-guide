@@ -582,6 +582,9 @@ crypto.randomBytes(32, (err, buffer) => {
 - and then you can call a bunch of methods on the check() eg. isEmail()
 - then in the controller, you can call the other part of the middleware which gets the results of any errors in validationResult and stores it in errors const which we define.
 
+- validationResult() function from the express-validator library is used to obtain the validation errors that might have been added to the req object during the execution of the validation middleware.
+- When you execute the validation middleware functions, such as body('title').isString().isLength({ min: 3 }).trim(), they internally check the corresponding field (in this case, title) in the request body for validation. If a validation error occurs, the middleware function adds the error to the req object.
+
 ```shell
 npm install express-validator
 ```
@@ -611,6 +614,71 @@ exports.postSignup = async (req, res, next) => {
   app.use(bodyParser.urlencoded({ extended: false })); //handling <form> post data, "false" - parsing the URL-encoded data with the querystring library or the qs library (when true)
 - multer looks for request with enctype="multipart/form-data"
 
+- ### GOTCHAS with Multer
+- with multer, there is a callback function. you should put your code that follows inside the callback
+
+```js
+multer({ storage: fileStorage, fileFilter: fileFilter }).single('upload')(
+    req,
+    res,
+
+    // callback
+    async (error) => {
+      if (error) {
+        // Handle Multer error
+        console.error(error);
+        // Return an error response
+        return res.status(500).json({ error: 'File upload failed' });
+      }
+
+      const title = req.body.title;
+      const price = req.body.price;
+      const description = req.body.description;
+      const file = req.file!;
+
+      console.log({ title }, { price }, { description }, { file });
+
+      const validateAddProduct = [
+        body('title').isString().isLength({ min: 3 }).trim(),
+        body('price').isFloat(),
+        body('description').isLength({ min: 5, max: 200 }).trim(),
+      ];
+
+      const errors = validationResult(validateAddProduct);
+      if (!errors.isEmpty()) {
+        const error = new Error('Validation failed') as ErrorWithStatus;
+        error.statusCode = 422;
+        throw error;
+      }
+
+      //Mongoose - pass an object to Product - eg... { title (refers to title from schema) : title (refers to req.body.title) }
+      const product = new Product({
+        title: title,
+        price: price,
+        description: description,
+        imageUrl: file.path,
+        userId: '649cfd00d2d73557bd21c294', //or with mongoose: you can reference the entire object req.user and mongoose will get the ._id from there.
+      });
+
+      try {
+        const result = await product.save();
+
+        res.status(200).json({ status: 'PRODUCT CREATED', product: result });
+      } catch (err: any) {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      }
+    }
+  )
+```
+
 ```js
 npm i multer
 ```
+
+## handling forms
+
+- multer assists with file storage using file system at a location specified while the data from the form (including file locations) should be stored in database
+- because it is middleware, it processes incoming multipart/form-data from req and then passes that data after separating the file from the form

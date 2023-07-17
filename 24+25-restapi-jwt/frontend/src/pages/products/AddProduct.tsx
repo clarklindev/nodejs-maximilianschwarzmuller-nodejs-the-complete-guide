@@ -1,18 +1,16 @@
 import React from 'react';
-import {
-  Form,
-  useParams,
-  useLoaderData,
-  useActionData,
-  redirect,
-} from 'react-router-dom';
+import { Form, redirect } from 'react-router-dom';
+
 import styles from './AddProduct.module.css';
 
 export const AddProduct = () => {
-  const data = useActionData();
-
   return (
-    <Form className='product-details' action='/admin/add-product' method='POST'>
+    <Form
+      className='product-details'
+      encType='multipart/form-data'
+      action='/products/create'
+      method='post'
+    >
       <h2>Add new product:</h2>
 
       <div className={styles['form-control']}>
@@ -31,8 +29,8 @@ export const AddProduct = () => {
       </div>
 
       <div className={styles['form-control']}>
-        <label htmlFor='imageUrl'>imageUrl:</label>
-        <input name='imageUrl' />
+        <label htmlFor='upload'>upload:</label>
+        <input name='upload' type='file' />
       </div>
 
       <button type='submit'>submit</button>
@@ -43,27 +41,18 @@ export const AddProduct = () => {
 export const addProductAction = async ({ request }) => {
   const data = await request.formData();
 
-  console.log('data: ', data);
-
-  // Extract form data values
-  const submission = {};
-  for (const [key, value] of data.entries()) {
-    submission[key] = value;
-  }
+  const url = `${import.meta.env.VITE_BACKEND_URL}:${
+    import.meta.env.VITE_PORT
+  }/products`;
 
   // //send post request
-  const result = await fetch('http://localhost:3000/admin/add-product', {
+  const result = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(submission),
+    body: data,
   });
 
-  console.log('result:', result);
   if (result.ok) {
-    return redirect('/admin/products');
+    return redirect('/products');
   }
-  return result.json(); //{token, userId}
-  // console.log('returned: ', returned);
+  return result;
 };

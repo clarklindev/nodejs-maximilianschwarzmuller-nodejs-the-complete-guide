@@ -19,13 +19,13 @@ import { Faq } from './pages/help/Faq';
 import { Contact, contactAction } from './pages/help/Contact';
 
 //admin
-import { Products, productsLoader } from './pages/admin/Products';
+import { Products, productsLoader } from './pages/products/Products';
 import {
   ProductDetails,
   productDetailsLoader,
-} from './pages/admin/ProductDetails';
-import { ProductError } from './pages/admin/ProductError';
-import { AddProduct, addProductAction } from './pages/admin/AddProduct';
+} from './pages/products/ProductDetails';
+import { ProductError } from './pages/products/ProductError';
+import { AddProduct, addProductAction } from './pages/products/AddProduct';
 
 //auth
 import { Login, loginAction } from './pages/auth/Login';
@@ -62,35 +62,39 @@ export const router = createBrowserRouter(
       </Route>
 
       {/* auth */}
-      <Route path='auth/login' element={<Login />} action={loginAction} />
-      <Route path='auth/signup' element={<SignUp />} action={signupAction} />
-      <Route
-        path='auth/password-init-reset'
-        element={<PasswordInitReset />}
-        action={passwordInitResetAction}
-      />
-      <Route
-        path='auth/password-update'
-        element={<PasswordUpdate />}
-        action={passwordUpdateAction}
-      />
+      <Route path='auth'>
+        <Route path='login' element={<Login />} action={loginAction} />
+        <Route path='signup' element={<SignUp />} action={signupAction} />
+        <Route
+          path='password-init-reset'
+          element={<PasswordInitReset />}
+          action={passwordInitResetAction}
+        />
+        <Route
+          path='password-update'
+          element={<PasswordUpdate />}
+          action={passwordUpdateAction}
+        />
+      </Route>
 
       {/* admin */}
       <Route
-        path='admin'
+        path='products'
         element={<ProductsLayout />}
         errorElement={<ProductError />}
       >
-        <Route path='products' element={<Products />} loader={productsLoader} />
         <Route
-          path='products/:productId'
-          element={<ProductDetails />}
-          loader={productDetailsLoader}
-        />
-        <Route
-          path='add-product'
+          path='create'
           element={<AddProduct />}
           action={addProductAction}
+        />
+
+        <Route path='' element={<Products />} loader={productsLoader} />
+
+        <Route
+          path=':productId'
+          element={<ProductDetails />}
+          loader={productDetailsLoader}
         />
       </Route>
 

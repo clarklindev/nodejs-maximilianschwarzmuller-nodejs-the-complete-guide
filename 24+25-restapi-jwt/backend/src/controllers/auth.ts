@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
+import { ErrorWithStatus } from '../interface/ErrorWithStatus';
 import User from '../models/user';
 
 let transporter: nodemailer.Transporter; // Declare the transporter variable outside the function
@@ -30,6 +31,20 @@ export const login = async (
 ) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  // const validateLogin = [
+  //   body('email')
+  //     .isEmail()
+  //     .withMessage('Please enter a valid email')
+  //     .normalizeEmail({ gmail_remove_dots: false }),
+  //   body('password', 'password has to be valid')
+  //     .isLength({ min: 3 })
+  //     .isAlphanumeric()
+  //     .trim(),
+  // ];
+
+  //validate login here...
+  //---
 
   try {
     const user = await User.findOne({ email: email });
@@ -82,6 +97,38 @@ export const signup = async (
 ) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  // const validateSignup = [
+  //   body('email')
+  //     .isEmail()
+  //     .withMessage('Please enter a valid email')
+  //     .normalizeEmail()
+  //     .custom(async (value, { req }) => {
+  //       const user = await User.findOne({ email: req.body.email });
+  //       if (user) {
+  //         throw new Error('Email already in use');
+  //       }
+  //       return true;
+  //     }),
+  //   body(
+  //     'password',
+  //     'please enter a password with only numbers and text and atleast 6 chars' //default message for all validators below
+  //   )
+  //     .isLength({ min: 6 })
+  //     .isAlphanumeric()
+  //     .trim(), //check password value in body of request
+  //   body('confirmPassword')
+  //     .trim()
+  //     .custom((value, { req }) => {
+  //       if (value !== req.body.password) {
+  //         throw new Error('Passwords have to match!');
+  //       }
+  //       return true;
+  //     }),
+  // ];
+
+  //validate signup
+  //---
 
   try {
     const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
