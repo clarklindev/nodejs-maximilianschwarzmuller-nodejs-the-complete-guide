@@ -31,5 +31,7 @@ export const passwordInitResetAction = async ({ request }) => {
     email: data.get('email'),
   };
 
+  //fetch()
+
   return redirect('/');
 };

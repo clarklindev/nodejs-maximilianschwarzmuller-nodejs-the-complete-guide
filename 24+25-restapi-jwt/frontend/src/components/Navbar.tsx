@@ -31,12 +31,6 @@ export const Navbar = () => {
           >
             Products
           </NavLink>
-          <NavLink
-            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
-            to='testing/upload'
-          >
-            Upload
-          </NavLink>
         </div>
 
         <div>

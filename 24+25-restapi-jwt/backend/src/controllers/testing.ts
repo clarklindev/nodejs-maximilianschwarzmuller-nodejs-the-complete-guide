@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import DateHelper from '../helpers/DateHelper';
+import DateHelper from '../global/helpers/DateHelper';
 import multer from 'multer';
 
 const fileStorage = multer.diskStorage({
@@ -48,7 +48,7 @@ export const upload = (req: Request, res: Response, next: NextFunction) => {
       console.log('req.body:', req.body);
       console.log('req.file:', req.file);
       // Continue with next middleware or send response
-      res.status(200).json({ status: 'success' });
+      return res.status(200).json({ status: 'success' });
     }
   );
 };
