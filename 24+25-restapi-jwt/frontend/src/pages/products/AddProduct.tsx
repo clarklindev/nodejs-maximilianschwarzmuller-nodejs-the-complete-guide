@@ -38,8 +38,10 @@ export const AddProduct = () => {
   );
 };
 
-export const addProductAction = async ({ request }) => {
-  const data = await request.formData();
+export const action = async ({ request }) => {
+  const formData = await request.formData();
+
+  //check if formData.
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_PORT
@@ -48,7 +50,7 @@ export const addProductAction = async ({ request }) => {
   // //send post request
   const result = await fetch(url, {
     method: 'POST',
-    body: data,
+    body: formData,
   });
 
   if (result.ok) {

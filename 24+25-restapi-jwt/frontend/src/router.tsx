@@ -19,13 +19,17 @@ import { Faq } from './pages/help/Faq';
 import { Contact, contactAction } from './pages/help/Contact';
 
 //admin
-import { Products, productsLoader } from './pages/products/Products';
+import { Products, loader as productsLoader } from './pages/products/Products';
 import {
-  ProductDetails,
-  productDetailsLoader,
-} from './pages/products/ProductDetails';
+  EditProduct,
+  loader as editProductLoader,
+  action as editProductAction,
+} from './pages/products/EditProduct';
 import { ProductError } from './pages/products/ProductError';
-import { AddProduct, addProductAction } from './pages/products/AddProduct';
+import {
+  AddProduct,
+  action as addProductAction,
+} from './pages/products/AddProduct';
 
 //auth
 import { Login, loginAction } from './pages/auth/Login';
@@ -39,21 +43,12 @@ import {
   passwordUpdateAction,
 } from './pages/auth/PasswordUpdate';
 
-//testing
-import { UploadImage, uploadImageAction } from './pages/testing/UploadImage';
-
 // Configure nested routes with JSX
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<HomeLayout />}>
       <Route index element={<Home />} />
       <Route path='about' element={<About />} />
-      {/* testing */}
-      <Route
-        path='testing/upload'
-        element={<UploadImage />}
-        action={uploadImageAction}
-      />
 
       {/* help */}
       <Route path='help' element={<HelpLayout />}>
@@ -77,7 +72,7 @@ export const router = createBrowserRouter(
         />
       </Route>
 
-      {/* admin */}
+      {/* products */}
       <Route
         path='products'
         element={<ProductsLayout />}
@@ -93,8 +88,9 @@ export const router = createBrowserRouter(
 
         <Route
           path=':productId'
-          element={<ProductDetails />}
-          loader={productDetailsLoader}
+          element={<EditProduct />}
+          loader={editProductLoader}
+          action={editProductAction}
         />
       </Route>
 

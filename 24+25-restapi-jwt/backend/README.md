@@ -575,9 +575,16 @@ crypto.randomBytes(32, (err, buffer) => {
 ## validation
 
 - you want to validate (non-get) routes. ie (routes that post something)
-  - using express validator - https://express-validator.github.io/docs/guides/getting-started
-  - express-validator is a wrapper around validator.js
-  - then to add validation to a route, you can add extra middleware
+
+### validate.js (preferred)
+
+i prefer validation with validatejs
+
+### Express-Validator (course suggested)
+
+- using express validator - https://express-validator.github.io/docs/guides/getting-started
+- express-validator is a wrapper around validator.js
+- then to add validation to a route, you can add extra middleware
 - check takes a form field "name" or array of field names to check
 - and then you can call a bunch of methods on the check() eg. isEmail()
 - then in the controller, you can call the other part of the middleware which gets the results of any errors in validationResult and stores it in errors const which we define.
@@ -605,6 +612,75 @@ exports.postSignup = async (req, res, next) => {
     res.status(422).json(error: errors.array()[0].msg);
   }
 };
+```
+
+## serving files statically
+
+- on the backend, you can set a folder to serve static files
+
+```js
+app.use(express.static(path.join(__dirname, '../', 'public')));
+```
+
+## Multer for form handling of image upload
+
+- install multer on backend
+- on frontend, the form
+
+## Backend - main.tsx
+
+- multer is middleware to handle multipart/form-data
+- if you use {storage:} you can configure an object which takes "destination" and "filename"
+- multer.diskStorage configuration, when you set the destination as 'images', it specifies that uploaded files will be saved in the images folder relative to the current working directory. As long as the folder exists, multer will be able to access and save the uploaded files to that location.
+- note you cant use .ISOString() as filename because it contains ':' chars
+- you can add a filter to accept only certain filetypes with 'fileFilter', and a callback that returns true to accept / or returns false to deny file.
+
+```js
+// BACKEND - index.tsx
+
+const fileStorage = multer.diskStorage({
+  //call callback once done with set up, 1st param pass null if no error
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  //call callback once done with set up, 1st param pass null if no error
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + ' - ' + file.originalname); //file.filename is only assigned if you're not setting it, here it wont automatically generate a name for you because we are setting fileStorage filename.
+  },
+});
+
+const fileFilter = (req, file, cb);
+
+app.use(multer({ storage: fileStorage, fileFilter }).single('upload')); //the param name single('<param>') MUST be the same as on form input for upload
+
+// app.use(multer({ dest: 'images' }).single('upload')); //the param name single('<param>') MUST be the same as on form input for upload
+```
+
+- if you specify 'dest' and pass something to multer({dest:}), you wont get a buffer result, as multer stores the data in folder
+
+- default app.use(multer()) doesnt receive anything into multer().
+
+---
+
+### multer GOTCHAS
+
+.single('<param>') param MUST be the same as the "upload input's name" on the form
+
+```js
+app.use(multer().single('image'));
+```
+
+---
+
+- when using the "multipart/form-data" content type for sending data in an HTTP request, you typically need to use the FormData object to construct and send the request body. The FormData object is a built-in JavaScript object that provides a convenient way to serialize form data and create the necessary format for the "multipart/form-data" content type
+
+## BACKEND - route handler
+
+- then on the receiving backend route, you get access the req.body and req.file
+
+```js
+console.log('req.body:', req.body);
+console.log('req.file:', req.file);
 ```
 
 ## handling FORMS - file upload
@@ -682,3 +758,73 @@ npm i multer
 
 - multer assists with file storage using file system at a location specified while the data from the form (including file locations) should be stored in database
 - because it is middleware, it processes incoming multipart/form-data from req and then passes that data after separating the file from the form
+
+## storing images and paths
+
+- it's better to store the image filenames or relative paths in the database and then construct the full path dynamically in your code using the appropriate method for your platform (e.g., path.join in Node.js). This approach ensures portability and better security.
+- windows uses "\" and mac uses "/" so its best to use path and join to ensure the path is always created correctly for the os.
+- this is always so there is less maintenence when the file path changes.
+- note: the solution i went for is not to include the fullpath for imageUrl but rather just save the filename, and
+  then use express.static() to create the path
+
+### update on storing images
+
+- note image uploaded names is set on the BACKEND - index.tw with express
+
+```ts
+const fileStorage = multer.diskStorage({
+  //call callback once done with set up, 1st param pass null - no error
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  //call callback once done with set up, 1st param pass null - no error
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      DateHelper.filenameFriendlyDate(new Date()) + '__' + file.originalname //create unique filename
+    ); //file.filename is the new name multer gives
+  },
+});
+```
+
+- you should store files with unique file names even if they both have the same image, this is because if you use the same file name as reference for 2 separate db entries, when the one is deleted, the other will lose its reference to the image.
+
+### what i went with...
+
+- with the code below, when you need to access the /images folder, you basically create the file path that starts with /images
+
+```js
+const upload = req.file; //thanks to multer middleware, we have access to file and not just text from the form.
+
+const imageUrl = !upload ? req.body.imageUrl : upload.filename;
+```
+
+- and have this in the index.ts file
+
+```ts
+app.use('/images', express.static(path.join(__dirname, '../', 'images'))); //serving files as if from root folder but we need /images says we are looking in /images on root
+```
+
+### tutorial suggestion
+
+```js
+
+//To ensure that images can be loaded correctly on the frontend, you should also change the logic in the feed.js controller:
+
+//in createPosts, change the imageUrl const:
+
+exports.createPost = (req, res, next) => {
+    ...
+    const imageUrl = req.file.path.replace("\\" ,"/");
+    ...
+}
+and in updatePost (once we added that later):
+
+exports.updatePost = (req, res, next) => {
+    ...
+    imageUrl = req.file.path.replace("\\","/");
+```
+
+## deleting with postman
+
+- if you delete db image references with postman, dont forget to cleanup the images/ folder on the backend server

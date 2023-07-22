@@ -3,8 +3,11 @@ import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import validate from 'validate.js';
 
-import { ErrorWithStatus } from '../interface/ErrorWithStatus';
+import { validationSchema } from './auth.validation';
+import { formatValidationErrorsForResponse } from '../global/helpers/formatValidationErrorsForResponse';
+
 import User from '../models/user';
 
 let transporter: nodemailer.Transporter; // Declare the transporter variable outside the function
@@ -29,24 +32,21 @@ export const login = async (
   res: Response,
   next: NextFunction
 ) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  if (req.body.data) {
+    const validationErrors = validate(
+      req.body.data.attributes,
+      validationSchema,
+      { format: 'detailed' } //this is required for formattedErrors...as it will make validate() return an array
+    );
 
-  // const validateLogin = [
-  //   body('email')
-  //     .isEmail()
-  //     .withMessage('Please enter a valid email')
-  //     .normalizeEmail({ gmail_remove_dots: false }),
-  //   body('password', 'password has to be valid')
-  //     .isLength({ min: 3 })
-  //     .isAlphanumeric()
-  //     .trim(),
-  // ];
+    console.log('validationErrors: ', validationErrors);
+    if (validationErrors) {
+      const formattedErrors =
+        formatValidationErrorsForResponse(validationErrors);
+      return res.status(422).json({ errors: formattedErrors });
+    } //returns undefined if nothing is wrong
 
-  //validate login here...
-  //---
-
-  try {
+    const { email, password } = req.body.data.attributes;
     const user = await User.findOne({ email: email });
     if (!user) {
       return res.status(401).json({ error: 'user not found' });
@@ -56,7 +56,7 @@ export const login = async (
     //the result of compare() is a promise where it returns true if equal and false if not equal.
     const authenticatedUser = await bcrypt.compare(password, user.password);
     if (!authenticatedUser) {
-      return res.status(401).json({ error: 'wrong password' });
+      return res.status(401).json({ error: 'account details invalid' });
     }
 
     //.sign(what we want to store in token)
@@ -66,9 +66,9 @@ export const login = async (
       { expiresIn: '1h' }
     );
 
-    res.status(200).json({ token: token, userId: user._id.toString() });
-  } catch (err) {
-    next(err);
+    return res.status(200).json({ token: token, userId: user._id.toString() });
+  } else {
+    throw new Error('req.body.data does not exist');
   }
 };
 
@@ -79,15 +79,15 @@ export const logout = async (
 ) => {
   // clear session
   // callback with potential error as prop
-  if (req.session) {
-    req.session.destroy((err: Error) => {
-      if (err) {
-        console.log(err);
-        return res.json({ status: 'error', message: err });
-      }
-      res.json({ loggedIn: 'false' });
-    });
-  }
+  // if (req.session) {
+  //   req.session.destroy((err: Error) => {
+  //     if (err) {
+  //       console.log(err);
+  //       return res.json({ status: 'error', message: err });
+  //     }
+  //     return res.json({ loggedIn: 'false' });
+  //   });
+  // }
 };
 
 export const signup = async (
@@ -161,7 +161,7 @@ export const signup = async (
     console.log(err);
   }
 
-  res.json({
+  return res.json({
     status: 'OK',
     data: 'successfully created new user',
   });
@@ -209,14 +209,14 @@ export const resetPassword = (
           },
           subject: 'password reset',
           html: `<p>you requested a password reset</p>
-        <p>Click this <a href="http://${domainUrl}/auth/reset/${token}">link</a> to set a new password.
+        <p>Click this <a href="${domainUrl}/auth/reset/${token}">link</a> to set a new password.
       `,
         },
         (err, info) => {
           if (err) {
-            res.json({ status: 'error', message: err });
+            return res.json({ status: 'error', message: err });
           }
-          res.json({ status: info, url: domainUrl });
+          return res.json({ status: info, url: domainUrl });
         }
       );
     } catch (err) {
@@ -255,7 +255,7 @@ export const saveNewPassword = async (
     user.resetToken = undefined;
     user.resetTokenExpiration = undefined;
     const result = await user.save();
-    res.json({ status: result });
+    return res.json({ status: result });
   } catch (err) {
     console.log(err);
   }

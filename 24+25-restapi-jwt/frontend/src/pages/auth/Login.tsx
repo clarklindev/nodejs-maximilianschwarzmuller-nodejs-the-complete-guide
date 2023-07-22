@@ -1,6 +1,8 @@
 import React from 'react';
 
+import { ILoginResponse } from '../../interfaces/ILoginResponse';
 import styles from './Login.module.css';
+
 import { NavLink, Form, redirect, useActionData } from 'react-router-dom';
 
 export const Login = () => {
@@ -38,21 +40,19 @@ export const Login = () => {
 export const loginAction = async ({ request }) => {
   const data = await request.formData();
 
-  // Extract form data values
-  const submission = {};
-  for (const [key, value] of data.entries()) {
-    submission[key] = value;
-  }
-
-  //send post request
-  const result = await fetch('http://localhost:3000/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(submission),
-  });
-  const returned = await result.json(); //{token, userId}
+  const result = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}:${
+      import.meta.env.VITE_PORT
+    }/auth/login`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    }
+  );
+  const returned = (await result.json()) as ILoginResponse; //an object with {token, userId}
 
   if (submission.password.length < 3) {
     return { error: 'password must be over 3 chars' };
