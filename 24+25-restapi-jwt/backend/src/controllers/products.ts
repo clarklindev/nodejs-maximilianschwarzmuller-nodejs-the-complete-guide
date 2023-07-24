@@ -19,18 +19,36 @@ export const getProducts = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentPage = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.items) || 2;
+  const currentPage = parseInt(req.query.page);
+  let perPage = parseInt(req.query.items);
+
+  console.log('currentPage: ', currentPage);
+  console.log('perPage: ', perPage);
+
   const totalItems = await Product.find().countDocuments();
-
   try {
-    const products = await Product.find()
-      .skip((currentPage - 1) * perPage)
-      .limit(perPage);
+    let products;
 
-    return res
-      .status(200)
-      .json({ message: 'fetched posts!', products, totalItems, perPage });
+    if (!isNaN(currentPage) && !isNaN(perPage)) {
+      products = await Product.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    } else if (!isNaN(currentPage) && isNaN(perPage)) {
+      perPage = 2;
+      products = await Product.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    } else {
+      products = await Product.find(); // returns everything
+    }
+
+    return res.status(200).json({
+      message: 'fetched posts!',
+      products,
+      totalItems,
+      perPage: perPage,
+      page: currentPage,
+    }); //totalItems is needed when you return within pagination
   } catch (err: any) {
     console.log(err);
     if (!err.statusCode) {
