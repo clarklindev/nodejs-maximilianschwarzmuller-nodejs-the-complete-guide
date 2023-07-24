@@ -27,7 +27,7 @@
 
 20. File upload and download
 
-21. Adding Pagination (incomplete)
+21. Adding Pagination
 
 22. Understanding Async requests
 

@@ -19,10 +19,18 @@ export const getProducts = async (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const products = await Product.find();
+  const currentPage = parseInt(req.query.page) || 1;
+  const perPage = parseInt(req.query.items) || 2;
+  const totalItems = await Product.find().countDocuments();
 
-    return res.status(200).json({ message: 'fetched posts!', products });
+  try {
+    const products = await Product.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+
+    return res
+      .status(200)
+      .json({ message: 'fetched posts!', products, totalItems, perPage });
   } catch (err: any) {
     console.log(err);
     if (!err.statusCode) {

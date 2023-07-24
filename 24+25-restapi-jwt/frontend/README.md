@@ -92,3 +92,13 @@ VITE_API_URL=https://example.com/api
 ```js
 const apiUrl = import.meta.env.VITE_API_URL;
 ```
+
+## react-router-dom 6 - getting searchParams
+
+```ts
+const url = new URL(request.url);
+console.log('url:', url);
+
+const page = url.searchParams.get('page');
+console.log('page: ', page);
+```
