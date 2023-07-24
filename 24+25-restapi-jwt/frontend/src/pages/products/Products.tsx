@@ -62,7 +62,7 @@ export const Products = () => {
       <h2>Products</h2>
 
       {/* show if 'page' exists and 'perPage' exists */}
-      {queryPage && queryItems && (
+      {((queryPage && queryItems) || page) && (
         <div className='paginationButtons'>
           <button onClick={() => updatePage('prev')} disabled={page <= 1}>
             Prev
