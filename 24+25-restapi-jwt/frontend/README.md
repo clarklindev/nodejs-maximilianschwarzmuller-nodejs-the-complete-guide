@@ -30,6 +30,78 @@ import { Form, redirect } from 'react-router-dom';
 
 - note the use of formData() by react-router-6
 - when you use formData() to submit your form content, content-type for headers is set automatically by formData()
+- The data object is obtained from request.formData(), which is most likely a FormData object. When sending data in a POST request, you should either use FormData directly or convert it to a JSON string using JSON.stringify if you want to use 'application/json' as the Content-Type.
+- If you intend to send the data as JSON, you should convert the data object to JSON before sending it in the request body
+
+### send as JSONAPI conforming data
+
+-do not try to send a JavaScript object directly as the request body, but to follow the JSON API specification, you need to send a JSON string representing the object in the request body.
+
+- you still need to stringify json object
+- on the backend you need to define middleware to handle jsonapi data:
+
+```ts
+// Middleware to parse incoming JSON data with JSON API content type
+app.use(express.json({ type: 'application/vnd.api+json' }));
+```
+
+```ts
+export const action = async ({ request }) => {
+  const data = await request.formData();
+
+  const formData = new FormData();
+  formData.append('username', data.get('username'));
+  formData.append('email', data.get('email'));
+  formData.append('password', data.get('password'));
+
+  const url = `${import.meta.env.VITE_BACKEND_URL}:${
+    import.meta.env.VITE_PORT
+  }/auth/signup`;
+
+  const jsonData = formDataToJsonApi<UserAttributes>(formData, 'user');
+
+  const result = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/vnd.api+json', // Set the correct content type for JSON API
+    },
+    body: JSON.stringify(jsonData), // Convert the data to JSON string
+  });
+
+  // Handle the response from the server as needed
+  // For example, you might parse the JSON response and return it as a result
+  const responseData = await result.json();
+  return responseData;
+};
+```
+
+### send as JSON
+
+```js
+// Assuming 'data' is a FormData object, convert it to a JSON object
+const data = await request.formData();
+
+// Assuming 'data' is a FormData object, convert it to a JSON object
+const formDataAsObject = {};
+data.forEach((value, key) => {
+  formDataAsObject[key] = value;
+});
+
+const result = await fetch(
+  `${import.meta.env.VITE_BACKEND_URL}:${import.meta.env.VITE_PORT}/auth/login`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formDataAsObject), // Convert to JSON string
+  }
+);
+```
+
+### send as formData
+
+- If you prefer to send the FormData object directly, you can set the Content-Type header to 'multipart/form-data', but keep in mind that the server should be able to handle multipart form data.
 
 ```js
 // you would send from frontend like this:
@@ -44,6 +116,9 @@ const url = `${import.meta.env.VITE_BACKEND_URL}:${
 const result = await fetch(url, {
   method: 'POST',
   body: data,
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
 });
 ```
 

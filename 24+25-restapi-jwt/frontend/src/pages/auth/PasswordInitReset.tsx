@@ -24,7 +24,7 @@ export const PasswordInitReset = () => {
   );
 };
 
-export const passwordInitResetAction = async ({ request }) => {
+export const action = async ({ request }) => {
   const data = await request.formData();
 
   const submission = {

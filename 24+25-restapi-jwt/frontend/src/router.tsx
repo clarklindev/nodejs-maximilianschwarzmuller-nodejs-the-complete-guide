@@ -16,7 +16,7 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { NotFound } from './pages/NotFound';
 import { Faq } from './pages/help/Faq';
-import { Contact, contactAction } from './pages/help/Contact';
+import { Contact, action as contactAction } from './pages/help/Contact';
 
 //admin
 import { Products, loader as productsLoader } from './pages/products/Products';
@@ -32,15 +32,15 @@ import {
 } from './pages/products/AddProduct';
 
 //auth
-import { Login, loginAction } from './pages/auth/Login';
-import { SignUp, signupAction } from './pages/auth/SignUp';
+import { Login, action as loginAction } from './pages/auth/Login';
+import { SignUp, action as signupAction } from './pages/auth/SignUp';
 import {
   PasswordInitReset,
-  passwordInitResetAction,
+  action as passwordInitResetAction,
 } from './pages/auth/PasswordInitReset';
 import {
   PasswordUpdate,
-  passwordUpdateAction,
+  action as passwordUpdateAction,
 } from './pages/auth/PasswordUpdate';
 
 // Configure nested routes with JSX

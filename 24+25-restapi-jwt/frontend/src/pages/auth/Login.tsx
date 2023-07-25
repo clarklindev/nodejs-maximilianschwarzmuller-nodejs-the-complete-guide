@@ -37,7 +37,7 @@ export const Login = () => {
   );
 };
 
-export const loginAction = async ({ request }) => {
+export const action = async ({ request }) => {
   const data = await request.formData();
 
   const result = await fetch(
@@ -46,17 +46,10 @@ export const loginAction = async ({ request }) => {
     }/auth/login`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: data,
     }
   );
   const returned = (await result.json()) as ILoginResponse; //an object with {token, userId}
 
-  if (submission.password.length < 3) {
-    return { error: 'password must be over 3 chars' };
-  }
-
-  return redirect('/');
+  // return redirect('/');
 };
