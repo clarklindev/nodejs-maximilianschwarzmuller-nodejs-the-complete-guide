@@ -1,9 +1,10 @@
 import React from 'react';
+import { NavLink, Form, redirect, useActionData } from 'react-router-dom';
 
 import { ILoginResponse } from '../../interfaces/ILoginResponse';
 import styles from './Login.module.css';
-
-import { NavLink, Form, redirect, useActionData } from 'react-router-dom';
+import { formDataToJsonApi } from '../../global/helpers/formDataToJsonApi';
+import { UserAttributes } from '../../interfaces/UserAttributes';
 
 export const Login = () => {
   const data = useActionData();
@@ -40,16 +41,21 @@ export const Login = () => {
 export const action = async ({ request }) => {
   const data = await request.formData();
 
-  const result = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}:${
-      import.meta.env.VITE_PORT
-    }/auth/login`,
-    {
-      method: 'POST',
-      body: data,
-    }
-  );
+  const url = `${import.meta.env.VITE_BACKEND_URL}:${
+    import.meta.env.VITE_PORT
+  }/auth/login`;
+
+  const jsonData = formDataToJsonApi<LoginAttributes>(data, 'user');
+
+  const result = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/vnd.api+json' },
+    body: JSON.stringify(jsonData),
+  });
+
   const returned = (await result.json()) as ILoginResponse; //an object with {token, userId}
 
-  // return redirect('/');
+  console.log('returned: ', returned);
+
+  return redirect('/');
 };
