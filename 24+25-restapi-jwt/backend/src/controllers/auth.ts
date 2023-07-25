@@ -5,9 +5,9 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import validate from 'validate.js';
 
-import { validationSchema } from './auth.validation';
+import { validationSchema as AuthSignupValidation } from './authSignup.validation';
+import { validationSchema as AuthLoginValidation } from './authLogin.validation';
 import { formatValidationErrorsForResponse } from '../global/helpers/formatValidationErrorsForResponse';
-
 import User from '../models/user';
 
 let transporter: nodemailer.Transporter; // Declare the transporter variable outside the function
@@ -35,7 +35,7 @@ export const login = async (
   if (req.body.data) {
     const validationErrors = validate(
       req.body.data.attributes,
-      validationSchema,
+      AuthLoginValidation,
       { format: 'detailed' } //this is required for formattedErrors...as it will make validate() return an array
     );
 
@@ -95,76 +95,65 @@ export const signup = async (
   res: Response,
   next: NextFunction
 ) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const resourceType = req.body.data.type;
+  const resourceAttributes = req.body.data.attributes;
 
-  // const validateSignup = [
-  //   body('email')
-  //     .isEmail()
-  //     .withMessage('Please enter a valid email')
-  //     .normalizeEmail()
-  //     .custom(async (value, { req }) => {
-  //       const user = await User.findOne({ email: req.body.email });
-  //       if (user) {
-  //         throw new Error('Email already in use');
-  //       }
-  //       return true;
-  //     }),
-  //   body(
-  //     'password',
-  //     'please enter a password with only numbers and text and atleast 6 chars' //default message for all validators below
-  //   )
-  //     .isLength({ min: 6 })
-  //     .isAlphanumeric()
-  //     .trim(), //check password value in body of request
-  //   body('confirmPassword')
-  //     .trim()
-  //     .custom((value, { req }) => {
-  //       if (value !== req.body.password) {
-  //         throw new Error('Passwords have to match!');
-  //       }
-  //       return true;
-  //     }),
-  // ];
+  console.log('resourceType: ', resourceType);
+  console.log('resourceAttributes: ', resourceAttributes);
 
-  //validate signup
-  //---
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
-    const newUser = new User({
-      email,
-      password: hashedPassword,
-      cart: { items: [] },
+  res
+    .status(200)
+    .json({
+      message: 'Resource created successfully',
+      resourceType,
+      resourceAttributes,
     });
-    await newUser.save();
-  } catch (err) {
-    console.log(err);
-  }
 
-  try {
-    getTransporter().sendMail(
-      {
-        to: email,
-        from: {
-          name: 'Clark',
-          address: process.env.GMAIL_USER!,
-        },
-        subject: 'signup succeeded',
-        html: '<h1>you successfully signed up</h1>',
-      },
-      (err: Error | null, info: any) => {
-        console.log(info);
-      }
-    );
-  } catch (err) {
-    console.log(err);
-  }
-
-  return res.json({
-    status: 'OK',
-    data: 'successfully created new user',
-  });
+  // validate.async(req.body.data.attributes, AuthSignupValidation).then(
+  //   (attributes) => {
+  //     //success
+  //     console.log('Success!', attributes);
+  //     return res.status(200).json({ attributes });
+  //   },
+  //   (errors) => {
+  //     console.log('errors:', errors);
+  //     const formattedErrors = formatValidationErrorsForResponse(errors);
+  //     return res.status(422).json({ errors: formattedErrors });
+  //   }
+  // );
+  // try {
+  //   const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
+  //   const newUser = new User({
+  //     email,
+  //     password: hashedPassword,
+  //     cart: { items: [] },
+  //   });
+  //   await newUser.save();
+  // } catch (err) {
+  //   console.log(err);
+  // }
+  // try {
+  //   getTransporter().sendMail(
+  //     {
+  //       to: email,
+  //       from: {
+  //         name: 'Clark',
+  //         address: process.env.GMAIL_USER!,
+  //       },
+  //       subject: 'signup succeeded',
+  //       html: '<h1>you successfully signed up</h1>',
+  //     },
+  //     (err: Error | null, info: any) => {
+  //       console.log(info);
+  //     }
+  //   );
+  // } catch (err) {
+  //   console.log(err);
+  // }
+  // return res.json({
+  //   status: 'OK',
+  //   data: 'successfully created new user',
+  // });
 };
 
 export const resetPassword = (

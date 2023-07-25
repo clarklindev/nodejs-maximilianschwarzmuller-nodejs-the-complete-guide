@@ -4,7 +4,7 @@ import fs from 'fs';
 
 import Product from '../models/product';
 import validate from '../global/validators/validate';
-import { validationSchema } from './products.validation';
+import { validationSchema as ProductValidation } from './products.validation';
 import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
 
 //Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
@@ -80,7 +80,7 @@ export const addProduct = async (
   next: NextFunction
 ) => {
   //validate
-  const validationErrors = validate(req.body, validationSchema);
+  const validationErrors = validate(req.body, ProductValidation);
 
   if (validationErrors) {
     // Handle validation errors
@@ -134,7 +134,7 @@ export const editProduct = async (
   next: NextFunction
 ) => {
   //validate
-  const validationErrors = validate(req.body, validationSchema);
+  const validationErrors = validate(req.body, ProductValidation);
 
   if (validationErrors) {
     // Handle validation errors

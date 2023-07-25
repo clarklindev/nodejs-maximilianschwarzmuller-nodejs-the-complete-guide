@@ -27,7 +27,7 @@ export const Contact = () => {
   );
 };
 
-export const contactAction = async ({ request }) => {
+export const action = async ({ request }) => {
   console.log(request);
 
   const data = await request.formData();

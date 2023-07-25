@@ -65,8 +65,11 @@ const startConnection = async () => {
 };
 startConnection();
 
-app.use(express.urlencoded({ extended: false })); //handling <form> post data, "false" - parsing the URL-encoded data with the querystring librsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssary or the qs library (when true)
+app.use(express.urlencoded({ extended: false })); //handling <form> post data, "false" - parsing the URL-encoded data with the querystring library or the qs library (when true)
 app.use(express.json()); //parse json application/json
+
+// Middleware to parse incoming JSON data with JSON API content type
+app.use(express.json({ type: 'application/vnd.api+json' }));
 
 app.use(cors());
 
