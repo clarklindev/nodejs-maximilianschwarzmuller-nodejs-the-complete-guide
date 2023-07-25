@@ -32,44 +32,42 @@ export const login = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.body.data) {
-    const validationErrors = validate(
-      req.body.data.attributes,
-      AuthLoginValidation,
-      { format: 'detailed' } //this is required for formattedErrors...as it will make validate() return an array
-    );
+  const resourceType = req.body.data.type;
+  const resourceAttributes = req.body.data.attributes;
 
-    console.log('validationErrors: ', validationErrors);
-    if (validationErrors) {
-      const formattedErrors =
-        formatValidationErrorsForResponse(validationErrors);
-      return res.status(422).json({ errors: formattedErrors });
-    } //returns undefined if nothing is wrong
+  const validationErrors = validate(
+    resourceAttributes,
+    AuthLoginValidation,
+    { format: 'detailed' } //this is required for formattedErrors...as it will make validate() return an array
+  );
 
-    const { email, password } = req.body.data.attributes;
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return res.status(401).json({ error: 'user not found' });
-    }
+  console.log('validationErrors: ', validationErrors);
+  if (validationErrors) {
+    const formattedErrors = formatValidationErrorsForResponse(validationErrors);
+    return res.status(422).json({ errors: formattedErrors });
+  } //returns undefined if nothing is wrong
 
-    //compare password user entered..
-    //the result of compare() is a promise where it returns true if equal and false if not equal.
-    const authenticatedUser = await bcrypt.compare(password, user.password);
-    if (!authenticatedUser) {
-      return res.status(401).json({ error: 'account details invalid' });
-    }
-
-    //.sign(what we want to store in token)
-    const token = jwt.sign(
-      { email: user.email, userId: user._id.toString() },
-      process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
-    );
-
-    return res.status(200).json({ token: token, userId: user._id.toString() });
-  } else {
-    throw new Error('req.body.data does not exist');
+  const { email, password } = resourceAttributes;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    return res.status(401).json({ error: 'user not found' });
   }
+
+  //compare password user entered..
+  //the result of compare() is a promise where it returns true if equal and false if not equal.
+  const authenticatedUser = await bcrypt.compare(password, user.password);
+  if (!authenticatedUser) {
+    return res.status(401).json({ error: 'account details invalid' });
+  }
+
+  //.sign(what we want to store in token)
+  const token = jwt.sign(
+    { email: user.email, userId: user._id.toString() },
+    process.env.JWT_SECRET!,
+    { expiresIn: '1h' }
+  );
+
+  return res.status(200).json({ token: token, userId: user._id.toString() });
 };
 
 export const logout = async (
@@ -101,13 +99,11 @@ export const signup = async (
   console.log('resourceType: ', resourceType);
   console.log('resourceAttributes: ', resourceAttributes);
 
-  res
-    .status(200)
-    .json({
-      message: 'Resource created successfully',
-      resourceType,
-      resourceAttributes,
-    });
+  res.status(200).json({
+    message: 'Resource created successfully',
+    resourceType,
+    resourceAttributes,
+  });
 
   // validate.async(req.body.data.attributes, AuthSignupValidation).then(
   //   (attributes) => {
