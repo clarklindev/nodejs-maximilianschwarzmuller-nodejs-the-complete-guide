@@ -2,7 +2,6 @@ export const validationSchema = {
   email: {
     presence: true,
     email: true,
-    emailExists: true,
   },
   password: {
     presence: true,
