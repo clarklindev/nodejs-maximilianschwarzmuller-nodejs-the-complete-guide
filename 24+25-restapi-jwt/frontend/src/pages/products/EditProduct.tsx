@@ -54,6 +54,9 @@ export const EditProduct = () => {
 
     const result = await fetch(url, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
 
     console.log('result: ', result);
@@ -159,7 +162,12 @@ export const loader = async ({ params }) => {
     import.meta.env.VITE_PORT
   }/products/${productId}`;
 
-  const result = await fetch(url);
+  const result = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
   if (!result.ok) {
     throw Error('Could not find that ID');
   }
@@ -181,6 +189,9 @@ export async function action({ request, params }) {
   const result = await fetch(url, {
     method: 'PUT',
     body: formData, //no need to set contentType.. formData does this automatically.
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
   if (result.ok) {

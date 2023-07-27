@@ -8,17 +8,17 @@ import {
   deleteProduct,
   deleteAllProducts,
 } from '../controllers/products';
-import { isAuth } from '../middleware/is-auth';
+import { isAuth } from '../middleware/isAuth';
 
 const router = express.Router();
 
-router.get('/', getProducts);
-router.get('/:productId', getProduct);
+router.get('/', isAuth, getProducts);
+router.get('/:productId', isAuth, getProduct);
 
-router.post('/', addProduct);
-router.put('/:productId', editProduct);
+router.post('/', isAuth, addProduct);
+router.put('/:productId', isAuth, editProduct);
 
-router.delete('/:productId', deleteProduct);
-router.delete('/', deleteAllProducts);
+router.delete('/:productId', isAuth, deleteProduct);
+router.delete('/', isAuth, deleteAllProducts);
 
 export default router;

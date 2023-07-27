@@ -1,10 +1,11 @@
 import React from 'react';
 import { NavLink, Form, redirect, useActionData } from 'react-router-dom';
 
-import { ILoginResponse } from '../../interfaces/ILoginResponse';
 import styles from './Login.module.css';
+import { ILoginResponse } from '../../interfaces/ILoginResponse';
 import { formDataToJsonApi } from '../../global/helpers/formDataToJsonApi';
 import { UserAttributes } from '../../interfaces/UserAttributes';
+import { logOut } from './Logout';
 
 export const Login = () => {
   const data = useActionData();
@@ -53,9 +54,20 @@ export const action = async ({ request }) => {
     body: JSON.stringify(jsonData),
   });
 
-  const returned = (await result.json()) as ILoginResponse; //an object with {token, userId}
+  const returned: ILoginResponse = await result.json(); //an object with {token, userId}
 
-  console.log('returned: ', returned);
+  const remainingMilliseconds = 60 * 60 * 1000;
+  const expiryDate = new Date(new Date().getTime() + remainingMilliseconds); //set token valid for 1 hour
 
-  return redirect('/');
+  //save in localstorage: token, userId, expiryDate
+  localStorage.setItem('token', returned.token);
+  localStorage.setItem('userId', returned.userId);
+  localStorage.setItem('expiryDate', expiryDate.toISOString());
+
+  //auto logout after token expiryDate
+  setTimeout(() => {
+    logOut();
+  }, remainingMilliseconds);
+
+  return redirect('/products');
 };

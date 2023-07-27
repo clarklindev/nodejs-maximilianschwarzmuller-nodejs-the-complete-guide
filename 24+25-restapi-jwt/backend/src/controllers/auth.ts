@@ -9,6 +9,7 @@ import { validationSchema as AuthSignupValidation } from './authSignup.validatio
 import { validationSchema as AuthLoginValidation } from './authLogin.validation';
 import { formatValidationErrorsForResponse } from '../global/helpers/formatValidationErrorsForResponse';
 import User from '../models/user';
+import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
 
 let transporter: nodemailer.Transporter; // Declare the transporter variable outside the function
 
@@ -35,29 +36,37 @@ export const login = async (
   const resourceType = req.body.data.type;
   const resourceAttributes = req.body.data.attributes;
 
-  const validationErrors = validate(
-    resourceAttributes,
-    AuthLoginValidation,
-    { format: 'detailed' } //this is required for formattedErrors...as it will make validate() return an array
-  );
-
-  console.log('validationErrors: ', validationErrors);
-  if (validationErrors) {
-    const formattedErrors = formatValidationErrorsForResponse(validationErrors);
-    return res.status(422).json({ errors: formattedErrors });
-  } //returns undefined if nothing is wrong
+  const validationErrors = validate
+    .async(resourceAttributes, AuthLoginValidation)
+    .then(
+      () => {
+        console.log('validated');
+      },
+      (errors) => {
+        console.log('errors:', errors);
+        const formattedErrors = formatValidationErrorsForResponse(errors);
+        return res.status(422).json({ errors: formattedErrors });
+      }
+    );
 
   const { email, password } = resourceAttributes;
+
   const user = await User.findOne({ email: email });
   if (!user) {
-    return res.status(401).json({ error: 'user not found' });
+    const error: ErrorWithStatus = new Error('user not found');
+    error.statusCode = 401;
+    throw error;
   }
+
+  //after this we know email is valid and we have a "user" from db...
 
   //compare password user entered..
   //the result of compare() is a promise where it returns true if equal and false if not equal.
   const authenticatedUser = await bcrypt.compare(password, user.password);
   if (!authenticatedUser) {
-    return res.status(401).json({ error: 'account details invalid' });
+    const error: ErrorWithStatus = new Error('account details invalid');
+    error.statusCode = 401;
+    throw error;
   }
 
   //.sign(what we want to store in token)
@@ -96,60 +105,54 @@ export const signup = async (
   const resourceType = req.body.data.type;
   const resourceAttributes = req.body.data.attributes;
 
-  console.log('resourceType: ', resourceType);
-  console.log('resourceAttributes: ', resourceAttributes);
+  validate.async(resourceAttributes, AuthSignupValidation).then(
+    (attributes) => {
+      //success
+      console.log('Success!', attributes);
+    },
+    (errors) => {
+      console.log('errors:', errors);
+      const formattedErrors = formatValidationErrorsForResponse(errors);
+      return res.status(422).json({ errors: formattedErrors });
+    }
+  );
 
-  res.status(200).json({
-    message: 'Resource created successfully',
-    resourceType,
-    resourceAttributes,
-  });
+  const { username, email, password } = resourceAttributes;
 
-  // validate.async(req.body.data.attributes, AuthSignupValidation).then(
-  //   (attributes) => {
-  //     //success
-  //     console.log('Success!', attributes);
-  //     return res.status(200).json({ attributes });
-  //   },
-  //   (errors) => {
-  //     console.log('errors:', errors);
-  //     const formattedErrors = formatValidationErrorsForResponse(errors);
-  //     return res.status(422).json({ errors: formattedErrors });
-  //   }
-  // );
-  // try {
-  //   const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
-  //   const newUser = new User({
-  //     email,
-  //     password: hashedPassword,
-  //     cart: { items: [] },
-  //   });
-  //   await newUser.save();
-  // } catch (err) {
-  //   console.log(err);
-  // }
-  // try {
-  //   getTransporter().sendMail(
-  //     {
-  //       to: email,
-  //       from: {
-  //         name: 'Clark',
-  //         address: process.env.GMAIL_USER!,
-  //       },
-  //       subject: 'signup succeeded',
-  //       html: '<h1>you successfully signed up</h1>',
-  //     },
-  //     (err: Error | null, info: any) => {
-  //       console.log(info);
-  //     }
-  //   );
-  // } catch (err) {
-  //   console.log(err);
-  // }
-  // return res.json({
-  //   status: 'OK',
-  //   data: 'successfully created new user',
-  // });
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      cart: { items: [] },
+      products: [],
+    });
+    await newUser.save();
+
+    getTransporter().sendMail(
+      {
+        to: email,
+        from: {
+          name: 'Clark',
+          address: process.env.GMAIL_USER!,
+        },
+        subject: 'signup succeeded',
+        html: '<h1>you successfully signed up</h1>',
+      },
+      (err: Error | null, info: any) => {
+        console.log(info);
+      }
+    );
+
+    return res.status(201).json({
+      status: 'OK',
+      data: 'successfully created new user',
+      userId: newUser._id,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 export const resetPassword = (
@@ -224,8 +227,8 @@ export const saveNewPassword = async (
   //new password
   const newPassword = req.body.password;
 
-  //check if there is a user which has a matching token - and experation date is after the current date (meaning token is still valid)
-  //dont need to check what user._id is because on client side would have passed in user._id to this route anyways..
+  //check if there is a user which has a matching token - and expiration date is after the current date (meaning token is still valid)
+  //don't need to check what user._id is because on client side would have passed in user._id to this route anyways..
   const user = await User.findOne({
     resetToken: token,
     resetTokenExpiration: { $gt: Date.now() },
