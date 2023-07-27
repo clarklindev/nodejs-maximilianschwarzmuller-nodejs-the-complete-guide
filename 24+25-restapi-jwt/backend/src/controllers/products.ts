@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import mongoose, { SchemaType, Types } from 'mongoose';
 
 import Product from '../models/product';
+import User from '../models/user';
 import validate from '../global/validators/validate';
 import { validationSchema as ProductValidation } from './products.validation';
 import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
+import { IProduct } from '../global/interfaces/IProduct';
+import { IRequest } from '../global/interfaces/IRequest';
+import { IUser, IUserDocument } from '../global/interfaces/IUser';
 
 //Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id
@@ -19,11 +24,8 @@ export const getProducts = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentPage = parseInt(req.query.page);
-  let perPage = parseInt(req.query.items);
-
-  console.log('currentPage: ', currentPage);
-  console.log('perPage: ', perPage);
+  const currentPage = +req.query.page!;
+  let perPage = +req.query.items!;
 
   const totalItems = await Product.find().countDocuments();
   try {
@@ -75,7 +77,7 @@ export const getProduct = async (
 
 //addProduct should receive an upload image
 export const addProduct = async (
-  req: Request,
+  req: IRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -111,13 +113,20 @@ export const addProduct = async (
         price: price,
         description: description,
         imageUrl: upload.filename, //not the path, store just the image - makes things easier to maintain
-        userId: '649cfd00d2d73557bd21c294', //or with mongoose: you can reference the entire object req.user and mongoose will get the ._id from there.
+        userId: req.userId, //or with mongoose: you can reference the entire object req.user and mongoose will get the ._id from there.
       });
+
       const result = await product.save();
 
-      return res
-        .status(200)
-        .json({ status: 'PRODUCT CREATED', product: result });
+      //find the user thats associated with this product added
+      const user = await User.findById(req.userId); //reminder: we stored userId in the 'req' in isAuth.ts
+      user.addToProducts(product._id);
+
+      return res.status(200).json({
+        status: 'PRODUCT CREATED',
+        product: result,
+        creator: { _id: user._id, username: user.username },
+      });
     };
     createProduct();
   } catch (err: any) {
@@ -155,7 +164,7 @@ export const editProduct = async (
     throw error;
   }
 
-  //check if loggedin user is allowed to edit product
+  //check if logged in user is allowed to edit product
   // if (req.session) {
   //   if (
   //     product?.userId.toString() !== req.session.user?._id.toString() ||
@@ -169,17 +178,17 @@ export const editProduct = async (
   try {
     const product = await Product.findById(prodId)!;
 
+    let result;
+
     //we know something got updated so delete old image
-    if (imageUrl !== product.imageUrl) {
-      deleteImage(product.imageUrl);
+    if (product && imageUrl !== product.imageUrl) {
+      deleteImage(product.imageUrl!);
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDescription;
+      product.imageUrl = imageUrl;
+      result = await product.save();
     }
-
-    product.title = updatedTitle;
-    product.price = updatedPrice;
-    product.description = updatedDescription;
-    product.imageUrl = imageUrl;
-
-    const result = await product.save();
 
     return res.status(200).json({ status: 'PRODUCT EDITED', result });
   } catch (err) {
@@ -194,8 +203,6 @@ export const deleteAllProducts = async (
   next: NextFunction
 ) => {
   try {
-    //TODO- need to add authentication test
-
     const result = await Product.deleteMany({});
     return res.status(200).json(result);
   } catch (err) {
@@ -209,19 +216,6 @@ export const deleteProduct = async (
   next: NextFunction
 ) => {
   const prodId = req.params.productId;
-  // try {
-  //   if (req.session) {
-  //     const result = await Product.deleteOne({
-  //       _id: prodId,
-  //       userId: req.session.user._id, //extra check that the product.userId must be the same the req.user._id (loggedin user's id)
-  //     });
-  //     res.status(200).json({ status: 'PRODUCT DELETED', result });
-  //   }
-  // } catch (err) {
-  //   console.log(err);
-  //   res.status(500).json({ error: err });
-  // }
-
   const product = await Product.findById(prodId);
   if (!product) {
     const error: ErrorWithStatus = new Error('Could not find product');
@@ -230,21 +224,24 @@ export const deleteProduct = async (
   }
 
   try {
-    deleteImage(product.imageUrl);
+    deleteImage(product.imageUrl!);
 
     const result = await Product.deleteOne({
       _id: prodId,
     });
+
+    //also delete product from user reference
+    const user = await User.findById(req.userId);
+    user.products.pull(prodId); //pass into pull() id of product to remove
+    user.save();
+
     return res.status(200).json({ status: 'PRODUCT DELETED', result });
   } catch (err) {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
     next(err);
   }
 };
 
-const deleteImage = (file) => {
+const deleteImage = (file: string) => {
   const filePath = path.join(process.cwd(), 'images', file);
   fs.unlink(filePath, (err) => console.log(err));
 };

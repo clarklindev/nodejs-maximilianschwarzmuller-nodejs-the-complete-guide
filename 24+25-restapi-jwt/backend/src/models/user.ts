@@ -16,7 +16,7 @@ const userSchema = new Schema(
       required: true,
     },
 
-    name: {
+    username: {
       type: String,
       required: true,
     },
@@ -35,6 +35,16 @@ const userSchema = new Schema(
         },
       ],
     },
+
+    products: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+      },
+    ],
+
+    //add orders:[]
   },
   {
     methods: {
@@ -88,6 +98,13 @@ const userSchema = new Schema(
 
       clearCart() {
         this.cart = { items: [] };
+        return this.save();
+      },
+
+      addToProducts(productId) {
+        const updatedProducts = this.products ? [...this.products] : [];
+        updatedProducts.push(productId);
+        this.products = updatedProducts;
         return this.save();
       },
     },

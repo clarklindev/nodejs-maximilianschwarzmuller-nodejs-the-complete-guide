@@ -18,13 +18,7 @@ export const Products = () => {
   const queryPage = searchParams.get('page');
   const queryItems = searchParams.get('items');
 
-  console.log('products: ', products);
-  console.log('totalItems: ', totalItems);
-  console.log('perPage: ', perPage);
-  console.log('page: ', page);
-
   const totalPages = Math.ceil(parseInt(totalItems) / parseInt(perPage));
-  console.log('totalPages: ', totalPages);
 
   // only used if query params: 'page' && 'items'
   const updatePage = (type: string) => {
@@ -64,15 +58,12 @@ export const Products = () => {
       {/* show if 'page' exists and 'perPage' exists */}
       {((queryPage && queryItems) || page) && (
         <div className='paginationButtons'>
-          <button onClick={() => updatePage('prev')} disabled={page <= 1}>
-            Prev
-          </button>
-          <button
-            onClick={() => updatePage('next')}
-            disabled={page >= totalPages}
-          >
-            Next
-          </button>
+          {page > 1 && <button onClick={() => updatePage('prev')}>Prev</button>}
+          {`${page} of ${totalPages}`}
+
+          {page < totalPages && (
+            <button onClick={() => updatePage('next')}>Next</button>
+          )}
         </div>
       )}
 
@@ -100,20 +91,19 @@ export const Products = () => {
 };
 
 export const loader = async ({ request }) => {
-  console.log('productsLoader');
-
   const url = new URL(request.url);
   let page = url.searchParams.get('page');
   let items = url.searchParams.get('items');
-
-  console.log('page: ', page);
-  console.log('items: ', items);
 
   const domain = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_PORT
   }`;
 
-  const res = await fetch(`${domain}/products?page=${page}&items=${items}`);
+  const res = await fetch(`${domain}/products?page=${page}&items=${items}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
 
   if (!res.ok) {
     throw Error('Could not fetch the data');

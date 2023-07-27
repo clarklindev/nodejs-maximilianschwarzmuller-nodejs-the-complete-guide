@@ -439,6 +439,7 @@ try {
 ## using gmail to send email (working recommended)
 
 - using an app password = https://myaccount.google.com/apppasswords
+- then under security-> 2 factor auth
 - you generate a password to bypass 2factor auth, save in .env
 
 - https://stackoverflow.com/questions/60701936/error-invalid-login-application-specific-password-required/60718806#60718806

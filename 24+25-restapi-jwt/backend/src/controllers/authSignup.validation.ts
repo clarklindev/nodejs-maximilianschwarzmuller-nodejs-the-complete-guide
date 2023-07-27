@@ -1,11 +1,12 @@
 export const validationSchema = {
-  name: {
-    presence: true,
+  username: {
+    presence: { message: 'is required' },
   },
+
   email: {
     presence: true,
     email: true,
-    emailExists: true,
+    emailAvailable: true,
   },
   password: {
     presence: true,
