@@ -203,7 +203,21 @@ export const deleteAllProducts = async (
   next: NextFunction
 ) => {
   try {
-    const result = await Product.deleteMany({});
+    const userProducts = await Product.find({ userId: req.userId });
+
+    //allows only to delete the product images associated with logged in user
+    //delete the image associated
+    userProducts.forEach((item) => {
+      deleteImage(item.imageUrl!);
+    });
+
+    const result = await Product.deleteMany({ userId: req.userId });
+
+    //also delete all products for user
+    const user = await User.findById(req.userId);
+    user.products = [];
+    user.save();
+
     return res.status(200).json(result);
   } catch (err) {
     console.log(err);
