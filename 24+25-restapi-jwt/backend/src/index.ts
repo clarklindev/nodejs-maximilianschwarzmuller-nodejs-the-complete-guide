@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import cookieParser from 'cookie-parser';
 
 //import internal modules
 import productRoutes from './routes/products';
@@ -65,13 +66,21 @@ const startConnection = async () => {
 };
 startConnection();
 
+// Enable CORS for specific origins with credentials
+const corsOptions = {
+  origin: 'http://localhost:5173', // Replace with your frontend URL
+  credentials: true,
+};
+
+//order important needs to come before express.json()
+app.use(cors(corsOptions));
+app.use(cookieParser());
+
 app.use(express.urlencoded({ extended: false })); //handling <form> post data, "false" - parsing the URL-encoded data with the querystring library or the qs library (when true)
 app.use(express.json()); //parse json application/json
 
 // Middleware to parse incoming JSON data with JSON API content type
 app.use(express.json({ type: 'application/vnd.api+json' }));
-
-app.use(cors());
 
 app.use(
   multer({

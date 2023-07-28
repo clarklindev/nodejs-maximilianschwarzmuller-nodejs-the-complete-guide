@@ -44,16 +44,13 @@ export const action = async ({ request }) => {
   //check if formData.
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/products`;
 
   // //send post request
   const result = await fetch(url, {
     method: 'POST',
     body: formData,
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
   });
 
   if (result.ok) {

@@ -11,6 +11,7 @@ import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
 import { IProduct } from '../global/interfaces/IProduct';
 import { IRequest } from '../global/interfaces/IRequest';
 import { IUser, IUserDocument } from '../global/interfaces/IUser';
+import product from '../models/product';
 
 //Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id
@@ -27,21 +28,21 @@ export const getProducts = async (
   const currentPage = +req.query.page!;
   let perPage = +req.query.items!;
 
-  const totalItems = await Product.find().countDocuments();
+  const totalItems = await Product.find({}).countDocuments();
   try {
     let products;
 
     if (!isNaN(currentPage) && !isNaN(perPage)) {
-      products = await Product.find()
+      products = await Product.find({ userId: req.userId })
         .skip((currentPage - 1) * perPage)
         .limit(perPage);
     } else if (!isNaN(currentPage) && isNaN(perPage)) {
       perPage = 2;
-      products = await Product.find()
+      products = await Product.find({ userId: req.userId })
         .skip((currentPage - 1) * perPage)
         .limit(perPage);
     } else {
-      products = await Product.find(); // returns everything
+      products = await Product.find({ userId: req.userId }); // returns everything
     }
 
     return res.status(200).json({
@@ -66,8 +67,21 @@ export const getProduct = async (
   next: NextFunction
 ) => {
   const prodId = req.params.productId;
+
   try {
     const product = await Product.findById(prodId);
+
+    console.log('BACKEND product: ', product);
+
+    if (product.userId.toString() !== req.userId) {
+      //meaning loggedin user is not authorised to edit this product
+      const error: ErrorWithStatus = new Error(
+        'unauthorized action for this logged in user'
+      );
+      error.statusCode = 500;
+      throw error;
+    }
+
     return res.status(200).json({ message: 'fetched product.', product });
   } catch (err) {
     console.log(err);
@@ -164,16 +178,11 @@ export const editProduct = async (
     throw error;
   }
 
-  //check if logged in user is allowed to edit product
-  // if (req.session) {
-  //   if (
-  //     product?.userId.toString() !== req.session.user?._id.toString() ||
-  //     product === null
-  //   ) {
-  //     //redirect away or return status message
-  //     return res.json({ status: 'user not allowed to edit product' });
-  //   }
-  // }
+  if (product.userId.toString() !== req.userId.toString()) {
+    const error: ErrorWithStatus = new Error('invalid authentication');
+    error.statusCode = 403;
+    throw error;
+  }
 
   try {
     const product = await Product.findById(prodId)!;
@@ -234,6 +243,12 @@ export const deleteProduct = async (
   if (!product) {
     const error: ErrorWithStatus = new Error('Could not find product');
     error.statusCode = 404;
+    throw error;
+  }
+
+  if (product.userId.toString() !== req.userId) {
+    const error: ErrorWithStatus = new Error('invalid authentication');
+    error.statusCode = 403;
     throw error;
   }
 

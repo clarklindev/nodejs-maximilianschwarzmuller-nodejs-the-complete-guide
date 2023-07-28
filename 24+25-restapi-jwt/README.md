@@ -15,9 +15,13 @@
 
 14. Sessions & cookies (switched out for jwt)
 
+- switch out again: JWT tokens with BEARER to JWT cookies
+
 15. adding authentication
 
 16. sending emails
+
+- using
 
 17. advanced authentication
 

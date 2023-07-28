@@ -49,14 +49,11 @@ export const EditProduct = () => {
   const deleteProduct = async () => {
     console.log('productId: ', productId);
     const url = `${import.meta.env.VITE_BACKEND_URL}:${
-      import.meta.env.VITE_PORT
+      import.meta.env.VITE_BACKEND_PORT
     }/products/${productId}`;
 
     const result = await fetch(url, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
     });
 
     console.log('result: ', result);
@@ -103,7 +100,7 @@ export const EditProduct = () => {
           {/* preview of what is currently saved */}
           <img
             src={`${import.meta.env.VITE_BACKEND_URL}:${
-              import.meta.env.VITE_PORT
+              import.meta.env.VITE_BACKEND_PORT
             }/images/${product.imageUrl}`}
             alt={product.title}
             width='150'
@@ -159,18 +156,19 @@ export const loader = async ({ params }) => {
   const { productId } = params;
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/products/${productId}`;
 
   const result = await fetch(url, {
     method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
   });
+
   if (!result.ok) {
     throw Error('Could not find that ID');
   }
+
   return result.json();
 };
 
@@ -183,15 +181,12 @@ export async function action({ request, params }) {
   // }
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/products/${productId}`;
 
   const result = await fetch(url, {
     method: 'PUT',
     body: formData, //no need to set contentType.. formData does this automatically.
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
   });
 
   if (result.ok) {

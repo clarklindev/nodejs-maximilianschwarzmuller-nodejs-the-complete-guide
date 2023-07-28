@@ -38,6 +38,7 @@ export const SignUp = () => {
           <NavLink to='/auth/password-init-reset'>Reset password</NavLink>
         </div>
       </Form>
+      {data && data.error && <p>{data.error}</p>}
     </div>
   );
 };
@@ -51,7 +52,7 @@ export const action = async ({ request }) => {
   formData.append('password', data.get('password'));
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/auth/signup`;
 
   const jsonData = formDataToJsonApi<UserAttributes>(formData, 'user');
@@ -62,5 +63,8 @@ export const action = async ({ request }) => {
     body: JSON.stringify(jsonData),
   });
 
-  return result;
+  if (!result.status === 'OK') {
+    return result;
+  }
+  return redirect('/');
 };
