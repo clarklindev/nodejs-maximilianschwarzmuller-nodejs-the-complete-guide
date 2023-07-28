@@ -77,7 +77,7 @@ export const Products = () => {
             <p>{product.title}</p>
             <img
               src={`${import.meta.env.VITE_BACKEND_URL}:${
-                import.meta.env.VITE_PORT
+                import.meta.env.VITE_BACKEND_PORT
               }/images/${product.imageUrl}`}
               width='200'
               height='auto'
@@ -92,22 +92,23 @@ export const Products = () => {
 
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
+
   let page = url.searchParams.get('page');
   let items = url.searchParams.get('items');
 
   const domain = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }`;
 
-  const res = await fetch(`${domain}/products?page=${page}&items=${items}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+  const result = await fetch(`${domain}/products?page=${page}&items=${items}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', //this is needed for cookies to be included with request
   });
 
-  if (!res.ok) {
+  if (!result.ok) {
     throw Error('Could not fetch the data');
   }
 
-  return res.json();
+  return result.json();
 };

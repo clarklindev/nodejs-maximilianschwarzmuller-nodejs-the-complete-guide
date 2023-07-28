@@ -33,8 +33,7 @@ export const login = async (
   res: Response,
   next: NextFunction
 ) => {
-  const resourceType = req.body.data.type;
-  const resourceAttributes = req.body.data.attributes;
+  const resourceAttributes = req.body.data.attributes; //gets from frontend
 
   const validationErrors = validate
     .async(resourceAttributes, AuthLoginValidation)
@@ -69,14 +68,18 @@ export const login = async (
     throw error;
   }
 
-  //.sign(what we want to store in token)
-  const token = jwt.sign(
-    { email: user.email, userId: user._id.toString() },
-    process.env.JWT_SECRET!,
-    { expiresIn: '1h' }
-  );
+  console.log('authenticatedUser: ', authenticatedUser);
 
-  return res.status(200).json({ token: token, userId: user._id.toString() });
+  const saveInToken = { email: user.email, userId: user._id.toString() }; //save inside token
+  const token = await jwt.sign(saveInToken, process.env.JWT_SECRET!, {
+    expiresIn: '1h', //manages its own expiration
+  });
+
+  console.log('signed token is: ', token);
+
+  // Set the token as an HttpOnly cookie with the Secure flag (only sent over HTTPS)
+  res.cookie('token', token, { httpOnly: true, secure: true });
+  res.send({ message: 'Login successful', loggedIn: true });
 };
 
 export const logout = async (
@@ -95,6 +98,12 @@ export const logout = async (
   //     return res.json({ loggedIn: 'false' });
   //   });
   // }
+  // Set the "token" cookie to expire in the past
+  res.setHeader(
+    'Set-Cookie',
+    'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; HttpOnly'
+  );
+  res.send({ message: 'Logged out successfully.', loggedIn: false });
 };
 
 export const signup = async (
@@ -121,6 +130,8 @@ export const signup = async (
 
   try {
     const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (amount of times to hash - for more secure password)
+
+    //save in db
     const newUser = new User({
       username,
       email,
@@ -130,6 +141,7 @@ export const signup = async (
     });
     await newUser.save();
 
+    //send mail
     getTransporter().sendMail(
       {
         to: email,
@@ -141,7 +153,7 @@ export const signup = async (
         html: '<h1>you successfully signed up</h1>',
       },
       (err: Error | null, info: any) => {
-        console.log(info);
+        console.log('success sent email');
       }
     );
 
@@ -151,7 +163,7 @@ export const signup = async (
       userId: newUser._id,
     });
   } catch (err) {
-    console.log(err);
+    console.log('ERROR: ', err);
   }
 };
 

@@ -55,7 +55,7 @@ export const action = async ({ request }) => {
   formData.append('password', data.get('password'));
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/auth/signup`;
 
   const jsonData = formDataToJsonApi<UserAttributes>(formData, 'user');
@@ -88,7 +88,9 @@ data.forEach((value, key) => {
 });
 
 const result = await fetch(
-  `${import.meta.env.VITE_BACKEND_URL}:${import.meta.env.VITE_PORT}/auth/login`,
+  `${import.meta.env.VITE_BACKEND_URL}:${
+    import.meta.env.VITE_BACKEND_PORT
+  }/auth/login`,
   {
     method: 'POST',
     headers: {
@@ -109,7 +111,7 @@ const result = await fetch(
 const data = await request.formData(); //form data received from form post.
 
 const url = `${import.meta.env.VITE_BACKEND_URL}:${
-  import.meta.env.VITE_PORT
+  import.meta.env.VITE_BACKEND_PORT
 }/testing/upload`;
 
 // //send post request
@@ -176,4 +178,126 @@ console.log('url:', url);
 
 const page = url.searchParams.get('page');
 console.log('page: ', page);
+```
+
+---
+
+# AUTHENTICATION: HTTP-only cookie (PREFERRED)
+
+```ts
+// on the server
+const token = await jwt.sign(saveInToken, process.env.JWT_SECRET!, {
+  expiresIn: '1h',
+});
+
+res.cookie('token', token, { httpOnly: true, secure: true });
+res.send('Login successful');
+```
+
+- then all you do is check for token presence checkLoggedIn()
+
+```ts
+// Function to check if the token cookie is present
+function checkLoggedIn() {
+  const cookies = document.cookie;
+  const cookieArray = cookies.split('; ');
+  const tokenCookie = cookieArray.find((cookie) => cookie.startsWith('token='));
+  if (tokenCookie) {
+    // Token cookie is present, user is logged in
+    return true;
+  } else {
+    // Token cookie is not present, user is not logged in
+    return false;
+  }
+}
+
+// Usage example
+if (checkLoggedIn()) {
+  // User is logged in, show the logout button
+} else {
+  // User is not logged in, show the login button
+}
+```
+
+OR
+
+- check if the token is expired, you need to extract the token from the HTTP-only cookie, decode it to access its payload, and then compare the expiration time (exp) with the current time on the frontend
+
+```ts
+function getCookie(name) {
+  const value = '; ' + document.cookie;
+  const parts = value.split('; ' + name + '=');
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function isTokenExpired(token) {
+  if (!token) return true;
+
+  const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decoding the token payload
+  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  return decodedToken.exp < currentTime; // Comparing expiration time with current time
+}
+
+//usage
+const token = getCookie('token');
+if (!isTokenExpired(token)) {
+  // Token is not expired, user is logged in
+  // Show the logout button or perform other actions for a logged-in user
+} else {
+  // Token is expired or not present, user is not logged in
+  // Show the login button or perform other actions for a logged-out user
+}
+```
+
+---
+
+# AUTHENTICATION: working with JWT (NOTE: REPLACED WITH HTTP-only cookie \*see above)
+
+- so with JWT you have to manage token expiration
+
+```ts
+// Assume token is the JWT token received from the server
+localStorage.setItem('token', token);
+```
+
+### using JWT token
+
+```ts
+// Check if the token is present and not expired
+const token = localStorage.getItem('token');
+if (token) {
+  // Token is present, check if it's expired
+  const decodedToken = jwt.decode(token);
+  const currentTime = Date.now() / 1000;
+  if (decodedToken.exp > currentTime) {
+    // Token is not expired, user is logged in
+    // You can update the UI here to show the logout button
+  } else {
+    // Token is expired, user is not logged in
+    // You might want to remove the token from storage in this case
+    localStorage.removeItem('token');
+  }
+}
+
+const isLoggedIn = /* Check if the user is logged in based on the token */;
+if (isLoggedIn) {
+  // Show logout button
+} else {
+  // Show login button
+}
+```
+
+```ts
+const token = getCookie('token');
+if (!isTokenExpired(token)) {
+  // Token is not expired, user is logged in
+  // Show the logout button or perform other actions for a logged-in user
+} else {
+  // Token is expired or not present, user is not logged in
+  // Show the login button or perform other actions for a logged-out user
+}
+
+// Clear the token from storage on logout
+localStorage.removeItem('token');
 ```

@@ -1,14 +1,29 @@
-import React from 'react';
-import { NavLink, Form, redirect, useActionData } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import {
+  NavLink,
+  Form,
+  redirect,
+  useActionData,
+  useNavigate,
+} from 'react-router-dom';
 
 import styles from './Login.module.css';
-import { ILoginResponse } from '../../interfaces/ILoginResponse';
 import { formDataToJsonApi } from '../../global/helpers/formDataToJsonApi';
-import { UserAttributes } from '../../interfaces/UserAttributes';
-import { logOut } from './Logout';
+import { AuthContext } from '../../context/AuthContext';
 
 export const Login = () => {
   const data = useActionData();
+  const { loggedIn, setLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log('calling context: setLoggedIn(true)');
+
+    if (data?.loggedIn) {
+      setLoggedIn(true); //for login/logout button
+      navigate('/');
+    }
+  }, [data?.loggedIn]);
 
   return (
     <div className={styles.wrapper}>
@@ -43,7 +58,7 @@ export const action = async ({ request }) => {
   const data = await request.formData();
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_PORT
+    import.meta.env.VITE_BACKEND_PORT
   }/auth/login`;
 
   const jsonData = formDataToJsonApi<LoginAttributes>(data, 'user');
@@ -52,22 +67,8 @@ export const action = async ({ request }) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/vnd.api+json' },
     body: JSON.stringify(jsonData),
+    credentials: 'include',
   });
 
-  const returned: ILoginResponse = await result.json(); //an object with {token, userId}
-
-  const remainingMilliseconds = 60 * 60 * 1000;
-  const expiryDate = new Date(new Date().getTime() + remainingMilliseconds); //set token valid for 1 hour
-
-  //save in localstorage: token, userId, expiryDate
-  localStorage.setItem('token', returned.token);
-  localStorage.setItem('userId', returned.userId);
-  localStorage.setItem('expiryDate', expiryDate.toISOString());
-
-  //auto logout after token expiryDate
-  setTimeout(() => {
-    logOut();
-  }, remainingMilliseconds);
-
-  return redirect('/products');
+  return result;
 };
