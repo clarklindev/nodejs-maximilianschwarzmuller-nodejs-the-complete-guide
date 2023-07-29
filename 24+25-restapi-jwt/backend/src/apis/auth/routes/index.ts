@@ -6,6 +6,7 @@ import {
   signup,
   resetPassword,
   saveNewPassword,
+  validateToken,
 } from '../controllers';
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get('/logout', logout);
 router.post('/signup', signup);
 router.post('/reset', resetPassword);
 router.post('/reset/:token', saveNewPassword);
+router.post('/validatetoken', validateToken);
 
 export default router;
