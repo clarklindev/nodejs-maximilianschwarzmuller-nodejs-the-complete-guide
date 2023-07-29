@@ -27,6 +27,23 @@ const getTransporter = () => {
   return transporter;
 };
 
+export const validateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.cookies.token; // way to Access the 'token' cookie value if using http-only cookie
+  console.log('validate token: ', token);
+
+  if (token) {
+    // Now you have the JWT token, and you can proceed to validate and use it as needed.
+    return res.json({ loggedIn: true });
+  } else {
+    // Handle the case when the token is not present in the request.
+    return res.json({ loggedIn: false });
+  }
+};
+
 //try log in
 export const login = async (
   req: Request,

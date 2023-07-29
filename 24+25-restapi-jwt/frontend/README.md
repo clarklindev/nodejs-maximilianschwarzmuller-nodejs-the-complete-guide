@@ -219,6 +219,34 @@ if (checkLoggedIn()) {
 }
 ```
 
+### getting this http-only cookie (on BACKEND)
+
+In most backend frameworks or libraries, the token will be available in the HTTP request headers under the "Cookie" header. The exact way to access it will depend on your backend technology. Since you mentioned using Express.js in a previous code snippet, I'll provide an example of how you can access the token on the backend using Express.js:
+
+```ts
+// Assuming you have the 'express' library installed and the server is already set up
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+export const validateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.cookies.token; // way to Access the 'token' cookie value if using http-only cookie
+  console.log('validate token: ', token);
+
+  if (token) {
+    // Now you have the JWT token, and you can proceed to validate and use it as needed.
+    return res.json({ loggedIn: true });
+  } else {
+    // Handle the case when the token is not present in the request.
+    return res.json({ loggedIn: false });
+  }
+};
+```
+
 OR
 
 - check if the token is expired, you need to extract the token from the HTTP-only cookie, decode it to access its payload, and then compare the expiration time (exp) with the current time on the frontend

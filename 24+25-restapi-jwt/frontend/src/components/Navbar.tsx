@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 
 import styles from './Navbar.module.css';
 import { AuthContext } from '../context/AuthContext';
-import { clearToken } from '../global/helpers/clearToken';
 import { logOut } from '../global/helpers/logOut';
 
 export const Navbar = () => {
