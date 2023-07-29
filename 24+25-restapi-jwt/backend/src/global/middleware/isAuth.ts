@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { IRequest } from '../global/interfaces/IRequest';
+import { IRequest } from '../interfaces/IRequest';
 
 //frontend sends token with header to backend where this middleware intercepts before routing...
 //verify this token that came in

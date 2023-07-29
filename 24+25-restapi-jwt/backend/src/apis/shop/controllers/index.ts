@@ -1,8 +1,8 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
-import Product from '../models/product';
-import Order from '../models/order';
-import { CartItem } from '../models/user';
+import Product from '../../../global/models/product';
+import Order from '../../../global/models/order';
+import { CartItem } from '../../../global/models/user';
 
 export const getCart = async (
   req: Request,

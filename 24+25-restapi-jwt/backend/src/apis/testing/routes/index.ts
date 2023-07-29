@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { upload } from '../controllers/testing';
+import { upload } from '../controllers';
 
 const router = express.Router();
 

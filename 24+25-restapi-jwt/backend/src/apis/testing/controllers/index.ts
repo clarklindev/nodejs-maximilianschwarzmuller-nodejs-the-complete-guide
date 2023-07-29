@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import DateHelper from '../global/helpers/DateHelper';
+import DateHelper from '../../../global/helpers/DateHelper';
 import multer from 'multer';
 
 const fileStorage = multer.diskStorage({

@@ -7,8 +7,8 @@ import {
   editProduct,
   deleteProduct,
   deleteAllProducts,
-} from '../controllers/products';
-import { isAuth } from '../middleware/isAuth';
+} from '../controllers';
+import { isAuth } from '../../../global/middleware/isAuth';
 
 const router = express.Router();
 
