@@ -6,7 +6,7 @@ import {
   cartDeleteProduct,
   postOrder,
   getOrders,
-} from '../controllers/shop';
+} from '../controllers';
 
 const router = express.Router();
 

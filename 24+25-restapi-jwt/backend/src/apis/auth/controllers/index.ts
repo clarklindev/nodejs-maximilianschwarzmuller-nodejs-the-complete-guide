@@ -7,9 +7,9 @@ import validate from 'validate.js';
 
 import { validationSchema as AuthSignupValidation } from './authSignup.validation';
 import { validationSchema as AuthLoginValidation } from './authLogin.validation';
-import { formatValidationErrorsForResponse } from '../global/helpers/formatValidationErrorsForResponse';
-import User from '../models/user';
-import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
+import { formatValidationErrorsForResponse } from '../../../global/helpers/formatValidationErrorsForResponse';
+import User from '../../../global/models/user';
+import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
 
 let transporter: nodemailer.Transporter; // Declare the transporter variable outside the function
 

@@ -3,15 +3,15 @@ import path from 'path';
 import fs from 'fs';
 import mongoose, { SchemaType, Types } from 'mongoose';
 
-import Product from '../models/product';
-import User from '../models/user';
-import validate from '../global/validators/validate';
+import Product from '../../../global/models/product';
+import User from '../../../global/models/user';
+import validate from '../../../global/validators';
 import { validationSchema as ProductValidation } from './products.validation';
-import { ErrorWithStatus } from '../global/interfaces/ErrorWithStatus';
-import { IProduct } from '../global/interfaces/IProduct';
-import { IRequest } from '../global/interfaces/IRequest';
-import { IUser, IUserDocument } from '../global/interfaces/IUser';
-import product from '../models/product';
+import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
+import { IProduct } from '../../../global/interfaces/IProduct';
+import { IRequest } from '../../../global/interfaces/IRequest';
+import { IUser, IUserDocument } from '../../../global/interfaces/IUser';
+import product from '../../../global/models/product';
 
 //Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id

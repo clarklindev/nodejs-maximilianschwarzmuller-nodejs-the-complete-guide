@@ -17,8 +17,6 @@ export const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('calling context: setLoggedIn(true)');
-
     if (data?.loggedIn) {
       setLoggedIn(true); //for login/logout button
       navigate('/');
@@ -61,7 +59,7 @@ export const action = async ({ request }) => {
     import.meta.env.VITE_BACKEND_PORT
   }/auth/login`;
 
-  const jsonData = formDataToJsonApi<LoginAttributes>(data, 'user');
+  const jsonData = formDataToJsonApi(data, 'user');
 
   const result = await fetch(url, {
     method: 'POST',

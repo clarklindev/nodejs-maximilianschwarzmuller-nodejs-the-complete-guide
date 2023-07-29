@@ -7,12 +7,11 @@ import multer from 'multer';
 import cookieParser from 'cookie-parser';
 
 //import internal modules
-import productRoutes from './routes/products';
-import shopRoutes from './routes/shop';
-import authRoutes from './routes/auth';
-import testingRoutes from './routes/testing';
+import productRoutes from './apis/products/routes';
+import shopRoutes from './apis/shop/routes';
+import authRoutes from './apis/auth/routes';
+import testingRoutes from './apis/testing/routes';
 import DateHelper from './global/helpers/DateHelper';
-
 import { ErrorWithStatus } from './global/interfaces/ErrorWithStatus';
 
 dotenv.config();
@@ -68,7 +67,7 @@ startConnection();
 
 // Enable CORS for specific origins with credentials
 const corsOptions = {
-  origin: 'http://localhost:5173', // Replace with your frontend URL
+  origin: `${process.env.FRONTEND_URL}:${process.env.FRONTEND_PORT}`, // Replace with your frontend URL
   credentials: true,
 };
 
@@ -96,6 +95,10 @@ app.use('/products', productRoutes);
 app.use('/shop', shopRoutes);
 app.use('/auth', authRoutes);
 app.use('/testing', testingRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ status: 'ERROR', message: 'Page Not Found' });
+});
 
 // catches all errors passed with next(err);
 app.use(
