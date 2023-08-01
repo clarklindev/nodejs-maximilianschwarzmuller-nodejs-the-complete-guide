@@ -132,18 +132,26 @@ export const getInvoice = async (
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('data', 'invoices', invoiceName);
 
-    fs.readFile(invoicePath, (err, data) => {
-      if (err) {
-        return next(err);
-      }
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        `${mode}; filename="${invoiceName}"`
-      ); //inline or attachment
+    //Preloading data
+    //handle whole file, send when done
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf');
+    //   res.setHeader(
+    //     'Content-Disposition',
+    //     `${mode}; filename="${invoiceName}"`
+    //   ); //inline or attachment
 
-      res.send(data); //return buffer
-    });
+    //   res.send(data); //return buffer
+    // });
+
+    //RECOMMENDED Method: piping read stream (file) into response
+    const file = fs.createReadStream(invoicePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
+    file.pipe(res);
   } catch (err) {
     next(err);
   }
