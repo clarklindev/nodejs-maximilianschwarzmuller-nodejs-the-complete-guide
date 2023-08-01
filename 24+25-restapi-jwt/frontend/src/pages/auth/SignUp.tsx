@@ -27,15 +27,17 @@ export const SignUp = () => {
           <label htmlFor='confirmPassword'>Confirm password</label>
           <input type='password' name='confirmPassword' />
         </div>
+
+        <br />
+
         <div className={styles['form-buttons']}>
           <button type='submit'>Sign up</button>
         </div>
+
+        <br />
+
         <div>
           account already exists? <NavLink to='/auth/login'>Login</NavLink>
-        </div>
-        <div>
-          Forgot your password{' '}
-          <NavLink to='/auth/password-init-reset'>Reset password</NavLink>
         </div>
       </Form>
       {data && data.error && <p>{data.error}</p>}
