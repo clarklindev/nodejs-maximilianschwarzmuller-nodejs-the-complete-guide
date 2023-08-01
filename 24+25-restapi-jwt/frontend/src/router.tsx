@@ -18,6 +18,9 @@ import { NotFound } from './pages/NotFound';
 import { Faq } from './pages/help/Faq';
 import { Contact, action as contactAction } from './pages/help/Contact';
 
+// orders
+import { Orders } from './pages/shop/Orders';
+
 //admin
 import { Products, loader as productsLoader } from './pages/products/Products';
 import {
@@ -93,6 +96,9 @@ export const router = createBrowserRouter(
           action={editProductAction}
         />
       </Route>
+
+      {/* shop */}
+      <Route path='orders/:orderId' element={<Orders />} />
 
       <Route path='*' element={<NotFound />} />
     </Route>

@@ -1,24 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
+import { ErrorWithStatus } from '../interfaces/ErrorWithStatus';
 import { IRequest } from '../interfaces/IRequest';
 
 //frontend sends token with header to backend where this middleware intercepts before routing...
 //verify this token that came in
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
-  // Retrieve the token from the cookie (this is the res.cookie() method, is secure)
+  const authHeader = req.get('Authorization');
+  if (!authHeader) {
+    return res.status(401).json({ error: 'no token' });
+  }
 
-  const token = req.cookies.token;
+  const token = authHeader.split(' ')[1];
 
   jwt.verify(token, process.env.JWT_SECRET as jwt.Secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send('Unauthorized.');
+      return res.status(401).json({ error: 'token invalid - Unauthorized.' });
     } else {
+      console.log('VERIFIED');
       // Access the userId from the decoded JWT payload
+      console.log('decoded: ', decoded);
+
       const userId = decoded.userId;
 
-      (req as IRequest).userId = userId;
+      req.userId = userId;
 
       next();
     }

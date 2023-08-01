@@ -6,15 +6,18 @@ import {
   cartDeleteProduct,
   postOrder,
   getOrders,
+  getInvoice,
 } from '../controllers';
+import { isAuth } from '../../../global/middleware/isAuth';
 
 const router = express.Router();
 
-router.get('/cart', getCart);
-router.post('/cart', postCart);
-router.delete('/cart', cartDeleteProduct);
+router.get('/cart', isAuth, getCart);
+router.post('/cart', isAuth, postCart);
+router.delete('/cart', isAuth, cartDeleteProduct);
 
-router.post('/order', postOrder);
-router.get('/orders', getOrders);
-// router.get('/orders/:orderId', getOrder);
+router.post('/orders', isAuth, postOrder);
+router.get('/orders', isAuth, getOrders);
+router.get('/orders/:orderId', isAuth, getInvoice);
+
 export default router;

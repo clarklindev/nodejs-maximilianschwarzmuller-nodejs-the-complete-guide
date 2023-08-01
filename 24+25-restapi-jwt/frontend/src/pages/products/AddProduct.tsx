@@ -51,10 +51,14 @@ export const action = async ({ request }) => {
   const result = await fetch(url, {
     method: 'POST',
     body: formData,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
   if (result.ok) {
     return redirect('/products');
   }
-  return result;
+  const data = await result.json();
+  return data;
 };
