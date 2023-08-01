@@ -33,16 +33,21 @@ export const Login = () => {
           <label htmlFor='password'>Password</label>
           <input type='password' name='password' id='password' />
         </div>
+        <div>
+          Forgot your password?{' '}
+          <NavLink to='/auth/password-init-reset'>Reset password</NavLink>
+        </div>
+
+        <br />
 
         <div className={styles['form-buttons']}>
           <button type='submit'>Login</button>
         </div>
+
+        <br />
+
         <div>
           Dont have an account? <NavLink to='/auth/signup'>Sign up</NavLink>
-        </div>
-        <div>
-          Forgot your password?{' '}
-          <NavLink to='/auth/password-init-reset'>Reset password</NavLink>
         </div>
       </Form>
       {data && data.error && <p>{data.error}</p>}

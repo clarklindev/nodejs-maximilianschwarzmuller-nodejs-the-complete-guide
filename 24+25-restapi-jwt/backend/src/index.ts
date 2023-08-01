@@ -96,6 +96,13 @@ app.use('/shop', shopRoutes);
 app.use('/auth', authRoutes);
 app.use('/testing', testingRoutes);
 
+app.get('/', (req, res) => {
+  // Your function logic here
+  res.send(
+    `Hello, this is the backend - you should probably try frontend: <a href="http://localhost:5173">http://localhost:5173</a>`
+  );
+});
+
 app.use((req, res) => {
   res.status(404).json({ status: 'ERROR', message: 'Page Not Found' });
 });

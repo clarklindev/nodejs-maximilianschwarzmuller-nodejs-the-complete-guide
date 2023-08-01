@@ -126,13 +126,14 @@ export const getInvoice = async (
     const orderUser = order.user.userId.toString();
     const loggedInUser = req.userId.toString();
 
+    //if the loggedin user is not the same as the person whose order it is...
     if (orderUser !== loggedInUser) {
       return next(new Error('Unorthorized to execute the operation'));
     }
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('data', 'invoices', invoiceName);
 
-    //Preloading data
+    //readFile Method - Preloading data
     //handle whole file, send when done
     // fs.readFile(invoicePath, (err, data) => {
     //   if (err) {
@@ -147,7 +148,7 @@ export const getInvoice = async (
     //   res.send(data); //return buffer
     // });
 
-    //RECOMMENDED Method: piping read stream (file) into response
+    //RECOMMENDED createReadStream Method: piping read stream (file) into response
     const file = fs.createReadStream(invoicePath);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
