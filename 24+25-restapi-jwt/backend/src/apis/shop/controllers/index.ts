@@ -1,12 +1,13 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import PDFDocument from 'pdfkit';
 
 import Product from '../../../global/models/product';
 import Order from '../../../global/models/order';
 import { CartItem } from '../../../global/models/user';
 import { IRequest } from '../../../global/interfaces/IRequest';
-
+import { createInvoice } from '../../../global/helpers/createInvoice';
 export const getCart = async (
   req: Request,
   res: Response,
@@ -124,7 +125,7 @@ export const getInvoice = async (
     }
 
     const orderUser = order.user.userId.toString();
-    const loggedInUser = req.userId.toString();
+    const loggedInUser = req.userId.toString(); //req.userId is available only if isAuth is executed
 
     //if the loggedin user is not the same as the person whose order it is...
     if (orderUser !== loggedInUser) {
@@ -133,6 +134,44 @@ export const getInvoice = async (
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('data', 'invoices', invoiceName);
 
+    //--------------------------------------------------------------------------
+    //set headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
+
+    //generate pdf on the fly
+    const invoiceData = {
+      shipping: {
+        name: 'John Doe',
+        address: '1234 Main Street',
+        city: 'San Francisco',
+        state: 'CA',
+        country: 'US',
+        postal_code: 94111,
+      },
+      items: [
+        {
+          item: 'TC 100',
+          description: 'Toner Cartridge',
+          quantity: 2,
+          amount: 6000,
+        },
+        {
+          item: 'USB_EXT',
+          description: 'USB Cable Extender',
+          quantity: 1,
+          amount: 2000,
+        },
+      ],
+      subtotal: 8000,
+      paid: 0,
+      invoice_nr: 1234,
+    };
+
+    const pdf = createInvoice(invoiceData, invoicePath);
+    pdf.pipe(res);
+
+    //--------------------------------------------------------------------------
     //readFile Method - Preloading data
     //handle whole file, send when done
     // fs.readFile(invoicePath, (err, data) => {
@@ -148,11 +187,12 @@ export const getInvoice = async (
     //   res.send(data); //return buffer
     // });
 
-    //RECOMMENDED createReadStream Method: piping read stream (file) into response
-    const file = fs.createReadStream(invoicePath);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
-    file.pipe(res);
+    //RECOMMENDED METHOD: createReadStream Method - piping read stream (file) into response
+    // const file = fs.createReadStream(invoicePath);
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
+    // file.pipe(res);
+    //--------------------------------------------------------------------------
   } catch (err) {
     next(err);
   }
