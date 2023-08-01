@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import styles from './Navbar.module.css';
 import { AuthContext } from '../context/AuthContext';
-import { logOut } from '../global/helpers/logOut';
 
 export const Navbar = () => {
   const { loggedIn, setLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const result = await logOut(); //server
-    console.log('result: ', result);
-    setLoggedIn(false); //login/logout buttons
+    setLoggedIn(false);
+    localStorage.setItem('token', '');
+    navigate('/');
   };
 
   return (
@@ -24,6 +24,7 @@ export const Navbar = () => {
           >
             Home
           </NavLink>
+
           <NavLink
             className={({ isActive }) => `nav-link ${isActive && 'active'}`}
             to='about'
@@ -41,6 +42,13 @@ export const Navbar = () => {
             to='products'
           >
             Products
+          </NavLink>
+
+          <NavLink
+            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+            to='orders'
+          >
+            Orders
           </NavLink>
         </div>
 

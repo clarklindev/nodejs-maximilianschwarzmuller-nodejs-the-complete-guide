@@ -54,6 +54,9 @@ export const EditProduct = () => {
 
     const result = await fetch(url, {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     });
 
     console.log('result: ', result);
@@ -161,8 +164,9 @@ export const loader = async ({ params }) => {
 
   const result = await fetch(url, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
   if (!result.ok) {
@@ -187,6 +191,9 @@ export async function action({ request, params }) {
   const result = await fetch(url, {
     method: 'PUT',
     body: formData, //no need to set contentType.. formData does this automatically.
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
   if (result.ok) {

@@ -102,8 +102,9 @@ export const loader = async ({ request }) => {
 
   const result = await fetch(`${domain}/products?page=${page}&items=${items}`, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', //this is needed for cookies to be included with request
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
   });
 
   if (!result.ok) {

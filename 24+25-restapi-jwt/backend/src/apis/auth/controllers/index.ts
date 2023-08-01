@@ -27,23 +27,6 @@ const getTransporter = () => {
   return transporter;
 };
 
-export const validateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.cookies.token; // way to Access the 'token' cookie value if using http-only cookie
-  console.log('validate token: ', token);
-
-  if (token) {
-    // Now you have the JWT token, and you can proceed to validate and use it as needed.
-    return res.json({ loggedIn: true });
-  } else {
-    // Handle the case when the token is not present in the request.
-    return res.json({ loggedIn: false });
-  }
-};
-
 //try log in
 export const login = async (
   req: Request,
@@ -92,35 +75,7 @@ export const login = async (
     expiresIn: '1h', //manages its own expiration
   });
 
-  console.log('signed token is: ', token);
-
-  // Set the token as an HttpOnly cookie with the Secure flag (only sent over HTTPS)
-  res.cookie('token', token, { httpOnly: true, secure: true });
-  res.send({ message: 'Login successful', loggedIn: true });
-};
-
-export const logout = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // clear session
-  // callback with potential error as prop
-  // if (req.session) {
-  //   req.session.destroy((err: Error) => {
-  //     if (err) {
-  //       console.log(err);
-  //       return res.json({ status: 'error', message: err });
-  //     }
-  //     return res.json({ loggedIn: 'false' });
-  //   });
-  // }
-  // Set the "token" cookie to expire in the past
-  res.setHeader(
-    'Set-Cookie',
-    'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; HttpOnly'
-  );
-  res.send({ message: 'Logged out successfully.', loggedIn: false });
+  res.send({ message: 'Login successful', token });
 };
 
 export const signup = async (
