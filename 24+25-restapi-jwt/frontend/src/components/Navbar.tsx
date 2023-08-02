@@ -55,16 +55,24 @@ export const Navbar = () => {
             >
               Orders
             </NavLink>
+
             <NavLink
               className={({ isActive }) => `nav-link ${isActive && 'active'}`}
               to='shop/cart'
             >
               Cart
             </NavLink>
+
             <button onClick={handleLogout}>Logout</button>
           </div>
         ) : (
           <div>
+            <NavLink
+              className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+              to='shop/cart'
+            >
+              Cart
+            </NavLink>
             <NavLink
               className={({ isActive }) => `nav-link ${isActive && 'active'}`}
               to='auth/login'
