@@ -73,7 +73,7 @@ export const EditProduct = () => {
       className='product-details'
       encType='multipart/form-data'
       action={`/products/${productId}`}
-      method='post'
+      method='PUT'
     >
       <h2>Add new product:</h2>
 

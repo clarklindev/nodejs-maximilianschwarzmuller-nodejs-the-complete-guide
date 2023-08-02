@@ -12,14 +12,18 @@ import { HelpLayout } from './layouts/HelpLayout';
 import { ProductsLayout } from './layouts/ProductsLayout';
 
 // pages
-import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { NotFound } from './pages/NotFound';
 import { Faq } from './pages/help/Faq';
 import { Contact, action as contactAction } from './pages/help/Contact';
 
-// orders
+//shop
 import { Orders } from './pages/shop/Orders';
+import { Cart } from './pages/shop/Cart';
+import {
+  Products as Shopping,
+  loader as shoppingLoader,
+} from './pages/shop/Products';
 
 //admin
 import { Products, loader as productsLoader } from './pages/products/Products';
@@ -50,7 +54,8 @@ import {
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<HomeLayout />}>
-      <Route index element={<Home />} />
+      <Route index element={<Shopping />} loader={shoppingLoader} />
+
       <Route path='about' element={<About />} />
 
       {/* help */}
@@ -98,7 +103,10 @@ export const router = createBrowserRouter(
       </Route>
 
       {/* shop */}
-      <Route path='orders/:orderId' element={<Orders />} />
+      <Route path='shop'>
+        <Route path='orders/:orderId' element={<Orders />} />
+        <Route path='cart' element={<Cart />} />
+      </Route>
 
       <Route path='*' element={<NotFound />} />
     </Route>

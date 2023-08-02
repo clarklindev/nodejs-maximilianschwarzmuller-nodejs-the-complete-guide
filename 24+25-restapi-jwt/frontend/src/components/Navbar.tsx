@@ -17,7 +17,7 @@ export const Navbar = () => {
   return (
     <header>
       <nav className={styles.navbar}>
-        <div>
+        <div className={styles.navLeft}>
           <NavLink
             className={({ isActive }) => `nav-link ${isActive && 'active'}`}
             to='/'
@@ -31,29 +31,38 @@ export const Navbar = () => {
           >
             About
           </NavLink>
+
           <NavLink
             className={({ isActive }) => `nav-link ${isActive && 'active'}`}
             to='help'
           >
             Help
           </NavLink>
-          <NavLink
-            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
-            to='products'
-          >
-            Products
-          </NavLink>
-
-          <NavLink
-            className={({ isActive }) => `nav-link ${isActive && 'active'}`}
-            to='orders'
-          >
-            Orders
-          </NavLink>
         </div>
 
         {loggedIn ? (
-          <button onClick={handleLogout}>Logout</button>
+          <div className={styles.navRight}>
+            <NavLink
+              className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+              to='products'
+            >
+              Admin
+            </NavLink>
+
+            <NavLink
+              className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+              to='shop/orders'
+            >
+              Orders
+            </NavLink>
+            <NavLink
+              className={({ isActive }) => `nav-link ${isActive && 'active'}`}
+              to='shop/cart'
+            >
+              Cart
+            </NavLink>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
         ) : (
           <div>
             <NavLink

@@ -10,3 +10,12 @@
   padding: 10px;
 }
 
+.navLeft{
+
+}
+
+.navRight{
+  display:flex;
+  flex-direction: row;
+  gap:15px;
+}

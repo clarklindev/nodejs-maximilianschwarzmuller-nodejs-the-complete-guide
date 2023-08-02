@@ -1,6 +1,8 @@
 import express from 'express';
 
 import {
+  getProducts,
+  getProduct,
   getCart,
   postCart,
   cartDeleteProduct,
@@ -8,9 +10,13 @@ import {
   getOrders,
   getInvoice,
 } from '../controllers';
+
 import { isAuth } from '../../../global/middleware/isAuth';
 
 const router = express.Router();
+
+router.get('/', getProducts);
+router.get('/:productId', getProduct);
 
 router.get('/cart', isAuth, getCart);
 router.post('/cart', isAuth, postCart);

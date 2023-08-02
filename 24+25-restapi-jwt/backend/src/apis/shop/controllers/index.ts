@@ -6,8 +6,67 @@ import PDFDocument from 'pdfkit';
 import Product from '../../../global/models/product';
 import Order from '../../../global/models/order';
 import { CartItem } from '../../../global/models/user';
-import { IRequest } from '../../../global/interfaces/IRequest';
 import { createInvoice } from '../../../global/helpers/createInvoice';
+import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
+
+export const getProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const currentPage = +req.query.page!;
+  let perPage = +req.query.items!;
+
+  const totalItems = await Product.find({}).countDocuments();
+  try {
+    let products;
+
+    if (!isNaN(currentPage) && !isNaN(perPage)) {
+      products = await Product.find({})
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    } else if (!isNaN(currentPage) && isNaN(perPage)) {
+      perPage = 2;
+      products = await Product.find({})
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    } else {
+      products = await Product.find({}); // returns everything
+    }
+
+    return res.status(200).json({
+      message: 'fetched posts!',
+      products,
+      totalItems,
+      perPage: perPage,
+      page: currentPage,
+    }); //totalItems is needed when you return within pagination
+  } catch (err: any) {
+    console.log(err);
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+export const getProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const prodId = req.params.productId;
+
+  try {
+    const product = await Product.findById(prodId);
+
+    return res.status(200).json({ message: 'fetched product.', product });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ error: err });
+  }
+};
+
 export const getCart = async (
   req: Request,
   res: Response,

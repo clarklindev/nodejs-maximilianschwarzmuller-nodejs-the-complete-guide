@@ -1,19 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
-import fs from 'fs';
-import mongoose, { SchemaType, Types } from 'mongoose';
 
 import Product from '../../../global/models/product';
 import User from '../../../global/models/user';
 import validate from '../../../global/validators';
 import { validationSchema as ProductValidation } from './products.validation';
 import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
-import { IProduct } from '../../../global/interfaces/IProduct';
 import { IRequest } from '../../../global/interfaces/IRequest';
-import { IUser, IUserDocument } from '../../../global/interfaces/IUser';
-import product from '../../../global/models/product';
+import { deleteFile } from '../../../global/helpers/deleteFile';
 
-//Mongoose selective retrieval - tells mongoose which props to retrieve (selective) or which not to retrieve
+//Mongoose selective retrieval - tells mongoose whIUserDocumentich props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id
 
 //using populate() it can retrieve full object on the prop that is using a ref by using a prop as reference
@@ -178,23 +174,30 @@ export const editProduct = async (
     throw error;
   }
 
-  if (product.userId.toString() !== req.userId.toString()) {
-    const error: ErrorWithStatus = new Error('invalid authentication');
-    error.statusCode = 403;
-    throw error;
-  }
-
   try {
     const product = await Product.findById(prodId)!;
+
+    const productUserId = product.userId.toString();
+    const requestUserId = req.userId.toString();
+    console.log('productUserId: ', productUserId);
+    console.log('requestUserId: ', requestUserId);
+
+    if (productUserId !== requestUserId) {
+      const error: ErrorWithStatus = new Error('invalid authentication');
+      error.statusCode = 403;
+      throw error;
+    }
 
     let result;
 
     //we know something got updated so delete old image
-    if (product && imageUrl !== product.imageUrl) {
-      deleteImage(product.imageUrl!);
+    if (product) {
+      if (imageUrl !== product.imageUrl) {
+        deleteFile(path.join(process.cwd(), 'images', product.imageUrl!));
+      }
       product.title = updatedTitle;
-      product.price = updatedPrice;
       product.description = updatedDescription;
+      product.price = updatedPrice;
       product.imageUrl = imageUrl;
       result = await product.save();
     }
@@ -217,7 +220,7 @@ export const deleteAllProducts = async (
     //allows only to delete the product images associated with logged in user
     //delete the image associated
     userProducts.forEach((item) => {
-      deleteImage(item.imageUrl!);
+      deleteFile(path.join(process.cwd(), 'images', product.imageUrl!));
     });
 
     const result = await Product.deleteMany({ userId: req.userId });
@@ -253,7 +256,7 @@ export const deleteProduct = async (
   }
 
   try {
-    deleteImage(product.imageUrl!);
+    deleteFile(path.join(process.cwd(), 'images', product.imageUrl!));
 
     const result = await Product.deleteOne({
       _id: prodId,
@@ -268,9 +271,4 @@ export const deleteProduct = async (
   } catch (err) {
     next(err);
   }
-};
-
-const deleteImage = (file: string) => {
-  const filePath = path.join(process.cwd(), 'images', file);
-  fs.unlink(filePath, (err) => console.log(err));
 };
