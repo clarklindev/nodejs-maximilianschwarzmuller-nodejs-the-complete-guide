@@ -1,33 +1,30 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-
-import { ErrorWithStatus } from '../interfaces/ErrorWithStatus';
-import { IRequest } from '../interfaces/IRequest';
+import jwt from 'jsonwebtoken';
 
 //frontend sends token with header to backend where this middleware intercepts before routing...
 //verify this token that came in
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
+  //test if authorization header is present
   const authHeader = req.get('Authorization');
+
   if (!authHeader) {
-    return res.status(401).json({ error: 'no token' });
+    const error = new Error('Not Authenticated');
+    error.statusCode = 401;
+    throw error;
   }
 
   const token = authHeader.split(' ')[1];
 
-  jwt.verify(token, process.env.JWT_SECRET as jwt.Secret, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ error: 'token invalid - Unauthorized.' });
-    } else {
-      console.log('VERIFIED');
-      // Access the userId from the decoded JWT payload
-      console.log('decoded: ', decoded);
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET as jwt.Secret);
 
-      const userId = decoded.userId;
+  if (!decodedToken) {
+    const error = new Error('not authenticated');
+    error.statusCode = 401;
+    throw error;
+  }
 
-      req.userId = userId;
+  req.userId = decodedToken.userId;
 
-      next();
-    }
-  });
+  next();
 };

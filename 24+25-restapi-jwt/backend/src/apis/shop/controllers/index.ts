@@ -14,8 +14,8 @@ export const getProducts = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentPage = +req.query.page!;
-  let perPage = +req.query.items!;
+  const currentPage = +req.query.page | 1;
+  let perPage = +req.query.items | 15;
 
   const totalItems = await Product.find({}).countDocuments();
   try {

@@ -15,7 +15,6 @@ import DateHelper from './global/helpers/DateHelper';
 import { ErrorWithStatus } from './global/interfaces/ErrorWithStatus';
 
 dotenv.config();
-
 const app: Express = express();
 
 //mongodb atlas node 2.2.12
@@ -70,16 +69,12 @@ const corsOptions = {
   origin: `${process.env.FRONTEND_URL}:${process.env.FRONTEND_PORT}`, // Replace with your frontend URL
   credentials: true,
 };
-
-//order important needs to come before express.json()
+//cors order important: needs to come before express.json()
 app.use(cors(corsOptions));
 app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: false })); //handling <form> post data, "false" - parsing the URL-encoded data with the querystring library or the qs library (when true)
 app.use(express.json()); //parse json application/json
-
-// Middleware to parse incoming JSON data with JSON API content type
-app.use(express.json({ type: 'application/vnd.api+json' }));
+app.use(express.json({ type: 'application/vnd.api+json' })); // Middleware to parse incoming JSON data with JSON API content type
 
 app.use(
   multer({
@@ -96,11 +91,11 @@ app.use('/shop', shopRoutes);
 app.use('/auth', authRoutes);
 app.use('/testing', testingRoutes);
 
-app.get('/', (req, res) => {
+app.use('/', (req, res) => {
   // Your function logic here
-  res.send(
-    `Hello, this is the backend - you should probably try frontend: <a href="http://localhost:5173">http://localhost:5173</a>`
-  );
+  res.json({
+    message: `<p>Hello, this is the backend - you should probably try frontend: <a href="http://localhost:5173">http://localhost:5173</a></p>`,
+  });
 });
 
 app.use((req, res) => {

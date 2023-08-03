@@ -10,50 +10,50 @@ import {
 import styles from './Products.module.css';
 
 export const Products = () => {
-  const { products, totalItems, perPage, page } = useLoaderData();
+  // const { products, totalItems, perPage, page } = useLoaderData();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const currentUrl = useHref();
+  // const currentUrl = useHref();
   const queryPage = searchParams.get('page');
   const queryItems = searchParams.get('items');
 
-  const totalPages = Math.ceil(parseInt(totalItems) / parseInt(perPage));
+  // const totalPages = Math.ceil(parseInt(totalItems) / parseInt(perPage));
 
   // only used if query params: 'page' && 'items'
-  const updatePage = (type: string) => {
-    let newPage;
+  // const updatePage = (type: string) => {
+  //   let newPage;
 
-    switch (type) {
-      case 'prev':
-        if (+page > 1) {
-          newPage = +page - 1;
-        }
-        break;
-      case 'next':
-        if (+page < totalPages) {
-          newPage = +page + 1;
-        }
-        break;
-      default:
-        return;
-    }
+  //   switch (type) {
+  //     case 'prev':
+  //       if (+page > 1) {
+  //         newPage = +page - 1;
+  //       }
+  //       break;
+  //     case 'next':
+  //       if (+page < totalPages) {
+  //         newPage = +page + 1;
+  //       }
+  //       break;
+  //     default:
+  //       return;
+  //   }
 
-    if (+page < 1) {
-      newPage = 1;
-    }
+  //   if (+page < 1) {
+  //     newPage = 1;
+  //   }
 
-    console.log('-------------------------------------\nnewPage: ', newPage);
+  //console.log('-------------------------------------\nnewPage: ', newPage);
 
-    navigate(`${currentUrl}?page=${newPage}&items=${perPage}`);
-  };
+  //navigate(`${currentUrl}?page=${newPage}&items=${perPage}`);
+  //};
 
   return (
     <div className={styles.products}>
       <h2>Products</h2>
 
       {/* show if 'page' exists and 'perPage' exists */}
-      {((queryPage && queryItems) || page) && (
+      {/* {((queryPage && queryItems) || page) && (
         <div className='paginationButtons'>
           {page > 1 && <button onClick={() => updatePage('prev')}>Prev</button>}
           {`${page} of ${totalPages}`}
@@ -62,11 +62,15 @@ export const Products = () => {
             <button onClick={() => updatePage('next')}>Next</button>
           )}
         </div>
-      )}
+      )} */}
 
-      {products.map((product, index) => {
+      {/* {products.map((product, index) => {
         return (
-          <div key={index}>
+          <NavLink
+            className={styles['nav-link']}
+            to={`${product._id}`}
+            key={index}
+          >
             <p>{product.title}</p>
             <img
               src={`${import.meta.env.VITE_BACKEND_URL}:${
@@ -76,9 +80,9 @@ export const Products = () => {
               height='auto'
               alt={product.title}
             />
-          </div>
+          </NavLink>
         );
-      })}
+      })} */}
     </div>
   );
 };
@@ -88,21 +92,23 @@ export const loader = async ({ request }) => {
 
   let page = url.searchParams.get('page');
   let items = url.searchParams.get('items');
+  const query = page && items ? `?page=${page}&items=${items}` : '';
 
   const domain = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_BACKEND_PORT
   }`;
 
-  const result = await fetch(`${domain}/shop?page=${page}&items=${items}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
+  // const result = await fetch(`${domain}/shop${query}`, {
+  //   method: 'GET',
+  //   // headers: {
+  //   //   Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //   // },
+  // });
 
-  if (!result.ok) {
-    throw Error('Could not fetch the data');
-  }
+  // if (!result.ok) {
+  //   throw Error('Could not fetch the data');
+  // }
 
-  return result.json();
+  // return result.json();
+  return null;
 };

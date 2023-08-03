@@ -1,14 +1,9 @@
-# backend mongodb - with mongoose
 
-- update .env from root of project directory
-- no need for database.js (mongodb managed)
+
 
 ```js
 const mongoose = require('mongoose');
-
-mongoose.connect(
-  `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@mongoDB-url`
-);
+mongoose.connect(`mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@mongodbURL`);
 ```
 
 - mongodb schemas (inside /models) dont need "\_id" added, this is added automatically

@@ -50,11 +50,10 @@ export const Products = () => {
 
   return (
     <div className={styles.products}>
+      <h2>Products</h2>
       <NavLink className={styles['nav-link']} to={`/products/create`}>
         Add product
       </NavLink>
-      <h2>Products</h2>
-
       {/* show if 'page' exists and 'perPage' exists */}
       {((queryPage && queryItems) || page) && (
         <div className='paginationButtons'>
@@ -67,13 +66,9 @@ export const Products = () => {
         </div>
       )}
 
-      {products.map((product, index) => {
+      {/* {products.map((product, index) => {
         return (
-          <NavLink
-            className={styles['nav-link']}
-            to={`${product._id}`}
-            key={index}
-          >
+          <div key={index}>
             <p>{product.title}</p>
             <img
               src={`${import.meta.env.VITE_BACKEND_URL}:${
@@ -83,9 +78,9 @@ export const Products = () => {
               height='auto'
               alt={product.title}
             />
-          </NavLink>
+          </div>
         );
-      })}
+      })} */}
     </div>
   );
 };
