@@ -3,17 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import PDFDocument from 'pdfkit';
 
-import Product from '../../../global/models/product';
-import Order from '../../../global/models/order';
-import { CartItem } from '../../../global/models/user';
-import { createInvoice } from '../../../global/helpers/createInvoice';
-import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
+import Product from '../../../lib/models/product';
+import Order from '../../../lib/models/order';
+import { CartItem } from '../../../lib/models/user';
+import { createInvoice } from '../../../lib/helpers/createInvoice';
+import { ErrorWithStatus } from '../../../lib/interfaces/ErrorWithStatus';
 
-export const getProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   const currentPage = +req.query.page | 1;
   let perPage = +req.query.items | 15;
 
@@ -50,11 +46,7 @@ export const getProducts = async (
   }
 };
 
-export const getProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   const prodId = req.params.productId;
 
   try {
@@ -67,11 +59,7 @@ export const getProduct = async (
   }
 };
 
-export const getCart = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getCart = async (req: Request, res: Response, next: NextFunction) => {
   // try {
   //   if (req.user) {
   //     const user = await req.user.populate('cart.items.productId');
@@ -86,11 +74,7 @@ export const getCart = async (
 };
 
 // //for adding new products to cart
-export const postCart = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const postCart = async (req: Request, res: Response, next: NextFunction) => {
   // const prodId = req.body.productId;
   // try {
   //   const product = await Product.findById(prodId);
@@ -104,11 +88,7 @@ export const postCart = async (
   // }
 };
 
-export const cartDeleteProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const cartDeleteProduct = async (req: Request, res: Response, next: NextFunction) => {
   // const prodId = req.body.productId;
   // try {
   //   const result = await req.user.deleteFromCart(prodId);
@@ -118,11 +98,7 @@ export const cartDeleteProduct = async (
   // }
 };
 
-export const postOrder = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const postOrder = async (req: Request, res: Response, next: NextFunction) => {
   // try {
   //   const user = await req.user.populate('cart.items.productId');
   //   //SEE MODELS for order: order products has object: {product, quantity} props but cart stores {productId, quantity}
@@ -146,11 +122,7 @@ export const postOrder = async (
   // }
 };
 
-export const getOrders = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
   // try {
   //   if (req.user) {
   //     const orders = await Order.find({ 'user.userId': req.user._id });
@@ -162,11 +134,7 @@ export const getOrders = async (
   // }
 };
 
-export const getInvoice = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getInvoice = async (req: Request, res: Response, next: NextFunction) => {
   const orderId = req.params.orderId;
 
   let mode: string;

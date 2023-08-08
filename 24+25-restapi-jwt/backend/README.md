@@ -1,8 +1,85 @@
+# captain-refactor
 
+- This is a mentorship project where I learn, expand, revise and correct habbits of backend development under mentorship from Tech Principal Developer @captainmike
 
+## express/typescript
+
+- [how to setup node](https://blog.logrocket.com/how-to-set-up-node-typescript-express/)
+
+- install and initialize dotenv in app.js
+- test apis with postman
+- add .env to .gitignore
+
+## .env
+
+- to send emails, you can use a service provider like sendgrid, i am using gmail (but this should be used only for small scale projects)
+- note gmail password:
+- using nodemailer
+
+### using gmail to send email (working)
+
+- using an app password = https://myaccount.google.com/apppasswords
+- then under security-> 2 factor auth
+- you generate a password to bypass 2factor auth, save in .env GMAIL_PASS=""
+
+- https://stackoverflow.com/questions/60701936/error-invalid-login-application-specific-password-required/60718806#60718806
 
 ```js
-const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
+```
+
+## development build
+
+- use eslint (.eslintrc.json) to show where errors / console.log()s are during development
+
+```shell
+npm run lint:fix
+```
+
+## production build
+
+- dist/ folder is excluded from repository
+- building the project 'npm run build' leaves the console.log()'s from codebase intact
+- removes console.logs() with babel plugin: babel-plugin-transform-remove-console specified ini .babelrc
+- package.json script:
+
+```shell
+npm run build
+npm run removelogs
+```
+
+## routes
+
+- "contacts/" requires mongodb access details:
+  - project: captainrefactor
+  - user: clarkcookie
+
+## CRUD / REST API setup (contacts/)
+
+- mongodb/mongoose
+- mongo atlas db
+
+---
+
+## mongodb/mongoose connection
+
+- use mongo atlas - create user account, db, allow ip
+- dont forget to configure .env with mongodb username/password
+- connection string: <GET THIS FROM MONGODB ATLAS>
+- use atlas node 2.12.2 connection url \*if 5.5 doesnt work
+
+```js
+// const mongoose = require('mongoose'); //commonjs
+import mongoose from 'mongoose'; //esmodule
+
 mongoose.connect(`mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@mongodbURL`);
 ```
 
@@ -10,7 +87,7 @@ mongoose.connect(`mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PA
 - with model created... pass an object to Product - eg... { title (refers to title from schema) : title (refers to req.body.title) }
 
 ```js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
@@ -33,7 +110,12 @@ const productSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Product', productSchema);
+// commonjs
+// module.exports = mongoose.model('Product', productSchema);
+
+// esmodules
+const model = mongoose.model('Product', productSchema);
+export default model;
 ```
 
 ## how are collections made with Mongoose?
@@ -81,6 +163,21 @@ Product.find().select('title price -_id'); //return title, price, not _id
 //selective retrieval also works for .populate
 const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
 ```
+
+### install body-parser \*DEPRECATED
+
+- note: since express 4.16 it is not necessary to import body-parser
+
+#### NEW METHOD
+
+```js
+import express, { Express } from 'express';
+
+app.use(express.json()); //parse incoming requests for json data
+app.use(express.urlencoded({ extended: true })); //form data
+```
+
+#### OLD METHOD
 
 ## Create
 
@@ -149,6 +246,7 @@ npm i body-parser
 
 ```js
 app.use(bodyParser.json()); //get data from form - by parsing the body of the
+app.use(bodyParser.urlencoded({ extended: false }));
 ```
 
 ## mongodb id
@@ -824,3 +922,93 @@ exports.updatePost = (req, res, next) => {
 ## deleting with postman
 
 - if you delete db image references with postman, dont forget to cleanup the images/ folder on the backend server
+
+
+---
+
+### Google phone number library
+
+- npm module: google-libphonenumber
+
+https://www.npmjs.com/package/google-libphonenumber
+
+```js
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+// Get an instance of `PhoneNumberUtil`.
+const phoneUtil = PhoneNumberUtil.getInstance();
+```
+
+## remove http-only cookies / use JWT tokens
+
+- although http-only cookies make things easier without the need to add content headers with "Authentication":"Bearer token",
+  decision to swop them out because they are only good when you use a web browser ie. web based (cookies), and would not work for non-web based calls to the api.
+- with JWT tokens, you can achieve stateless authentication using bearer tokens
+
+## vite env variables / vitest testing
+
+- when working with vite, vitest: it has its own mechanism for accessing env variables.
+- with vitest, you define your environment variables prepended with "VITE\_" eg. VITE_MONGODB_USER
+- then you can use 'import.meta.env.VITE_MONGODB_USER' to access the variable
+- so even if you're not using vite, but using vitest, if you have 'VITE\_' prepended to env variables you can read them...and if you dont you can change values directly: import.meta.env.MODE = 'test'
+- but process.env. doesnt work..
+- import.meta.env.MONGODB_USER doesnt seem to work if your env variable is MONGODB_USER
+
+```.env
+VITE_MONGODB_USER="abc"
+```
+
+```ts
+import.meta.env.VITE_MONGODB_USER;
+```
+
+---
+
+## whats the difference between Model<IUser> and Document<IUser>
+
+- In Mongoose, Model<IUser> and Document<IUser> are two different types that serve distinct purposes when working with MongoDB data.
+
+- In summary, Model<IUser> is used to interact with the entire collection, while Document<IUser> is used to interact with individual documents. They have different use cases and provide different levels of access and functionality when working with MongoDB data in a Mongoose application.
+
+- In Mongoose, when you use query methods like .findOneAndDelete(), you typically don't need to call .exec() explicitly. The query methods in Mongoose return a Query object that can be executed by chaining additional methods or by awaiting the query itself.
+
+### Model<IUser>:
+
+Model<IUser> represents the entire collection in the MongoDB database that corresponds to a specific Mongoose model.
+It provides methods for performing operations on the collection as a whole, such as querying, creating, updating, and deleting documents.
+When you define a Mongoose model, you usually use Model<IUser> to interact with the collection, define static methods, and access the Mongoose model's global methods.
+Example:
+
+```ts
+import { Document, Model, model, Schema } from 'mongoose';
+
+interface IUser extends Document {
+  username: string;
+  email: string;
+}
+
+const userSchema = new Schema({
+  username: String,
+  email: String,
+});
+
+const UserModel: Model<IUser> = model<IUser>('User', userSchema);
+
+const users: IUser[] = await UserModel.find();
+```
+
+### Document<IUser>:
+
+Document<IUser> represents an individual document within a collection.
+It provides access to the fields and methods of a specific document, allowing you to manipulate and interact with the data at the document level.
+You can use Document<IUser> to access and modify specific document properties, perform validation, and invoke instance methods defined on the Mongoose schema.
+Example:
+
+```ts
+const user: IUser | null = await UserModel.findOne({ username: 'john' });
+
+if (user) {
+  console.log(user.username); // Accessing a document property
+  user.email = 'newemail@example.com'; // Modifying a document property
+  await user.save(); // Saving changes to the database
+}
+```

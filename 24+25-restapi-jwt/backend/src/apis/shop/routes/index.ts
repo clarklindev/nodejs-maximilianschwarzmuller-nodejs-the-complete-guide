@@ -11,7 +11,7 @@ import {
   getInvoice,
 } from '../controllers';
 
-import { isAuth } from '../../../global/middleware/isAuth';
+import { isAuth } from '../../../lib/middleware/isAuth';
 
 const router = express.Router();
 

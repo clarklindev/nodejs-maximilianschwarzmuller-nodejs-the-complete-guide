@@ -1,4 +1,5 @@
 node_modules
+dist
 .env
-.env.template
-dist/
+.env.production
+notes

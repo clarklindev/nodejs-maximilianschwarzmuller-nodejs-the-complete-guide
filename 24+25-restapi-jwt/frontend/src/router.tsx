@@ -20,10 +20,7 @@ import { Contact, action as contactAction } from './pages/help/Contact';
 //shop
 import { Orders } from './pages/shop/Orders';
 import { Cart } from './pages/shop/Cart';
-import {
-  Products as Shopping,
-  loader as shoppingLoader,
-} from './pages/shop/Products';
+import { Shopping, loader as shoppingLoader } from './pages/shop/Shopping';
 
 //admin
 import { Products, loader as productsLoader } from './pages/products/Products';

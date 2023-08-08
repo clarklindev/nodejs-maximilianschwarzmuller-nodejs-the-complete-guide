@@ -66,9 +66,13 @@ export const Products = () => {
         </div>
       )}
 
-      {/* {products.map((product, index) => {
+      {products.map((product, index) => {
         return (
-          <div key={index}>
+          <NavLink
+            className={styles['nav-link']}
+            to={`${product._id}`}
+            key={index}
+          >
             <p>{product.title}</p>
             <img
               src={`${import.meta.env.VITE_BACKEND_URL}:${
@@ -78,9 +82,9 @@ export const Products = () => {
               height='auto'
               alt={product.title}
             />
-          </div>
+          </NavLink>
         );
-      })} */}
+      })}
     </div>
   );
 };
@@ -90,16 +94,17 @@ export const loader = async ({ request }) => {
 
   let page = url.searchParams.get('page');
   let items = url.searchParams.get('items');
+  const query = page && items ? `?page=${page}&items=${items}` : '';
 
   const domain = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_BACKEND_PORT
   }`;
 
-  const result = await fetch(`${domain}/products?page=${page}&items=${items}`, {
+  const result = await fetch(`${domain}/products${query}`, {
     method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
+    // headers: {
+    //   Authorization: `Bearer ${localStorage.getItem('token')}`,
+    // },
   });
 
   if (!result.ok) {
@@ -107,4 +112,5 @@ export const loader = async ({ request }) => {
   }
 
   return result.json();
+  return null;
 };

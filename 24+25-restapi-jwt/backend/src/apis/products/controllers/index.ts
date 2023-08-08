@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
 
-import Product from '../../../global/models/product';
-import User from '../../../global/models/user';
-import validate from '../../../global/validators';
+import Product from '../../../lib/models/product';
+import User from '../../../lib/models/user';
+import validate from '../../../lib/validators';
 import { validationSchema as ProductValidation } from './products.validation';
-import { ErrorWithStatus } from '../../../global/interfaces/ErrorWithStatus';
-import { IRequest } from '../../../global/interfaces/IRequest';
-import { deleteFile } from '../../../global/helpers/deleteFile';
+import { IError } from '../../../lib/interfaces/IError';
+import { IRequest } from '../../../lib/interfaces/IRequest';
+import { deleteFile } from '../../../lib/helpers/deleteFile';
+import { IUser, IUserDocument } from '../../auth/interfaces/IUser';
 
 //Mongoose selective retrieval - tells mongoose whIUserDocumentich props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id
@@ -16,11 +17,7 @@ import { deleteFile } from '../../../global/helpers/deleteFile';
 //const products = await Product.find().populate('userId');
 //selective retrieval also works for .populate
 //const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
-export const getProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   const currentPage = +req.query.page!;
   let perPage = +req.query.items!;
 
@@ -57,11 +54,7 @@ export const getProducts = async (
   }
 };
 
-export const getProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   const prodId = req.params.productId;
 
   try {
@@ -71,9 +64,7 @@ export const getProduct = async (
 
     if (product.userId.toString() !== req.userId) {
       //meaning loggedin user is not authorised to edit this product
-      const error: ErrorWithStatus = new Error(
-        'unauthorized action for this logged in user'
-      );
+      const error: IError = new Error('unauthorized action for this logged in user');
       error.statusCode = 500;
       throw error;
     }
@@ -86,11 +77,7 @@ export const getProduct = async (
 };
 
 //addProduct should receive an upload image
-export const addProduct = async (
-  req: IRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const addProduct = async (req: IRequest, res: Response, next: NextFunction) => {
   //validate
   const validationErrors = validate(req.body, ProductValidation);
 
@@ -110,7 +97,7 @@ export const addProduct = async (
 
   //if no file was uploaded
   if (!upload) {
-    const error: ErrorWithStatus = new Error('No file uploaded');
+    const error: IError = new Error('No file uploaded');
     error.statusCode = 422;
     throw error;
   }
@@ -129,14 +116,22 @@ export const addProduct = async (
       const result = await product.save();
 
       //find the user thats associated with this product added
-      const user = await User.findById(req.userId); //reminder: we stored userId in the 'req' in isAuth.ts
-      user.addToProducts(product._id);
+      const user: IUserDocument | null = await User.findById(req.userId); //reminder: we stored userId in the 'req' in isAuth.ts
+      if (!user) {
+        const error: IError = new Error('User not found');
+        error.statusCode = 422;
+        next(error);
+      }
 
-      return res.status(200).json({
-        status: 'PRODUCT CREATED',
-        product: result,
-        creator: { _id: user._id, username: user.username },
-      });
+      if (user) {
+        user.addToProducts(product._id);
+
+        return res.status(200).json({
+          status: 'PRODUCT CREATED',
+          product: result,
+          creator: { _id: user._id, username: user.username },
+        });
+      }
     };
     createProduct();
   } catch (err: any) {
@@ -147,11 +142,7 @@ export const addProduct = async (
   }
 };
 
-export const editProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const editProduct = async (req: Request, res: Response, next: NextFunction) => {
   //validate
   const validationErrors = validate(req.body, ProductValidation);
 
@@ -169,7 +160,7 @@ export const editProduct = async (
 
   const imageUrl = !upload ? req.body.imageUrl : upload.filename;
   if (!imageUrl) {
-    const error: ErrorWithStatus = new Error('invalid file format');
+    const error: IError = new Error('invalid file format');
     error.statusCode = 422;
     throw error;
   }
@@ -183,7 +174,7 @@ export const editProduct = async (
     console.log('requestUserId: ', requestUserId);
 
     if (productUserId !== requestUserId) {
-      const error: ErrorWithStatus = new Error('invalid authentication');
+      const error: IError = new Error('invalid authentication');
       error.statusCode = 403;
       throw error;
     }
@@ -209,11 +200,7 @@ export const editProduct = async (
   }
 };
 
-export const deleteAllProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const deleteAllProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userProducts = await Product.find({ userId: req.userId });
 
@@ -236,21 +223,17 @@ export const deleteAllProducts = async (
   }
 };
 
-export const deleteProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
   const prodId = req.params.productId;
   const product = await Product.findById(prodId);
   if (!product) {
-    const error: ErrorWithStatus = new Error('Could not find product');
+    const error: IError = new Error('Could not find product');
     error.statusCode = 404;
     throw error;
   }
 
   if (product.userId.toString() !== req.userId) {
-    const error: ErrorWithStatus = new Error('invalid authentication');
+    const error: IError = new Error('invalid authentication');
     error.statusCode = 403;
     throw error;
   }

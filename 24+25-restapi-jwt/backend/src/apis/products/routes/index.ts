@@ -1,14 +1,7 @@
 import express from 'express';
 
-import {
-  getProducts,
-  getProduct,
-  addProduct,
-  editProduct,
-  deleteProduct,
-  deleteAllProducts,
-} from '../controllers';
-import { isAuth } from '../../../global/middleware/isAuth';
+import { getProducts, getProduct, addProduct, editProduct, deleteProduct, deleteAllProducts } from '../controllers';
+import { isAuth } from '../../../lib/middleware/isAuth';
 
 const router = express.Router();
 
