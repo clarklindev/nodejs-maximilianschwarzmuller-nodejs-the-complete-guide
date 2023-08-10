@@ -1,4 +1,4 @@
-import { IContact } from '../../contacts/interfaces/IContact';
+import { IContact } from '../../../lib/interfaces/IContact';
 export interface ITenant {
   email: string;
   name?: string;

@@ -1,12 +1,13 @@
 import { Schema, model, Types } from 'mongoose';
-import { IUser } from '../../apis/auth/interfaces/IUser';
+import { IUser } from '../interfaces/IUser';
 
 export interface CartItem {
   productId: Types.ObjectId;
   quantity: number;
 }
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser>(
+  {
     email: {
       type: String,
       required: true,
@@ -21,17 +22,15 @@ const userSchema = new Schema<IUser>({
       required: true,
     },
 
-     resetToken: {
-    type: String,
-    required: false,
-  },
-   
-  resetTokenExpiration: {
-    type: Number,
-    required: false,
-  },
+    resetToken: {
+      type: String,
+      required: false,
+    },
 
-
+    resetTokenExpiration: {
+      type: Number,
+      required: false,
+    },
 
     cart: {
       items: [
@@ -118,7 +117,7 @@ const userSchema = new Schema<IUser>({
         return this.save();
       },
     },
-  }
+  },
 );
 
 export default model<IUser>('User', userSchema);

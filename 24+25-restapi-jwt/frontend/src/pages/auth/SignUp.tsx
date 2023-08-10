@@ -3,7 +3,7 @@ import { NavLink, Form, useActionData, redirect } from 'react-router-dom';
 
 import styles from './SignUp.module.css';
 import { UserAttributes } from '../../interfaces/UserAttributes';
-import { formDataToJsonApi } from '../../global/helpers/formDataToJsonApi';
+import { formDataToJsonApi } from '../../lib/helpers/formDataToJsonApi';
 
 export const SignUp = () => {
   const data = useActionData();

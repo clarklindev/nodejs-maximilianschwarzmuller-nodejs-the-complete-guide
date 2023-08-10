@@ -7,6 +7,7 @@
   - using JSONApi for backend data structure
   - using React on frontend
   - using Vite for build
+  - using Vitest (jest) for testing
 
 - This folder covers the following sections from Udemy course:
   https://www.udemy.com/course/nodejs-the-complete-guide
@@ -20,8 +21,6 @@
 15. adding authentication
 
 16. sending emails
-
-- using
 
 17. advanced authentication
 

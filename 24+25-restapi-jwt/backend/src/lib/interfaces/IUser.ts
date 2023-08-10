@@ -1,10 +1,5 @@
 import { Document, Model, Types } from 'mongoose'; //import Document is NB
-
-// Interface representing a single item in the cart
-interface CartItem {
-  productId: Types.ObjectId;
-  quantity: number;
-}
+import { CartItem } from './ICartItem';
 
 // Interface representing the User document in MongoDB
 export interface IUser extends Document {
@@ -13,11 +8,11 @@ export interface IUser extends Document {
   username: string;
   resetToken?: string | null;
   resetTokenExpiration?: number | null;
-  _doc: any;
   cart: {
     items: CartItem[];
   };
   products: Types.ObjectId[];
+  _doc?: any;
 }
 
 // Interface representing the User mongoose model type

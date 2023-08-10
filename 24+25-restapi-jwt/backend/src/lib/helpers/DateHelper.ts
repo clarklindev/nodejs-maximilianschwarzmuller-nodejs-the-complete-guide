@@ -1,28 +1,29 @@
+//.toISOString() returns UTC
+
 class DateHelper {
-  static filenameFriendlyDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-
-    const amOrPm = hours < 12 ? 'am' : 'pm';
-
-    const formattedTime = `${hours % 12 || 12}h${minutes}m${seconds}s${milliseconds}ms`;
-
-    return `${year}-${month}-${day} [${formattedTime}]`;
+  //Date -> ISO-Date string
+  static filenameFriendlyUTCDate = (date: Date) => {
+    const isoString = date.toISOString(); //returns UTC
+    const friendlyFilename = isoString.replace(/:/g, '_');
+    return friendlyFilename; //eg. 2022-03-01T06_30_00.000Z
   };
 
-  static jsDateNowToUnixEpoch(date: number) {
-    return Math.floor(date / 1000);
+  //unix epoch (seconds) to ISO-Date string
+  //ISO-Date same as RFC3339_ISO8601
+  static unixEpochToUTCDate(unixTimestamp: number) {
+    const newDate = new Date(unixTimestamp * 1000); // Multiply by 1000 to convert from seconds to milliseconds
+    return newDate.toISOString(); //eg. 2022-03-01T06:30:00.000Z
   }
 
-  static unixEpochToRFC3339_ISO8601(unixTimestamp: number) {
-    const newDate = new Date(unixTimestamp * 1000); // Multiply by 1000 to convert from seconds to milliseconds
-    return newDate.toISOString();
+  //ISO-Date string -> unix epoch (seconds)
+  //Date.parse() returns milliseconds
+  static jsISOStringToUnixEpoch(isoDateString: string) {
+    return Math.floor(Date.parse(isoDateString) / 1000); //eg. 1646116200
+  }
+
+  //Date.now() (milliseconds) -> unix epoch (seconds)
+  static jsDateNowToUnixEpoch(date: number) {
+    return Math.floor(date / 1000); //eg. 1646116200
   }
 }
 

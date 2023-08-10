@@ -10,6 +10,5 @@ export interface IContact extends Document {
   lastName?: string;
   phoneNumber?: string;
   defaultCountryCode?: string;
-
-  _doc: any;
+  _doc?: any;
 }

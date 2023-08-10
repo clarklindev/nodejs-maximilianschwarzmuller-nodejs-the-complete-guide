@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { floatWithTwoDecimals } from './numbers';
+import { floatWithTwoDecimals } from '../../../src/lib/validators/numbers';
 
-describe('numbers()', () => {
+describe('floatWithTwoDecimals()', () => {
   it('should return a warning if input is not a float with exactly two decimal places', () => {
     const result = floatWithTwoDecimals('2');
     expect(result).toBe('must be a float with exactly two decimal places');

@@ -1,38 +1,70 @@
-import { describe, beforeAll, beforeEach, afterAll } from 'vitest';
-import mongoose from 'mongoose';
-import User from '../../../../src/lib/models/user';
+import { expect, describe, it, vi } from 'vitest';
+import { Types } from 'mongoose';
+import { login } from '../../../../src/apis/auth/controllers';
+import sinon from 'sinon';
 
-beforeAll(async () => {
-  const MONGODB_URI = `mongodb://${import.meta.env.VITE_MONGODB_USER}:${
-    import.meta.env.VITE_MONGODB_PASSWORD
-  }@ac-yztvzc4-shard-00-00.b5tvnqi.mongodb.net:27017,ac-yztvzc4-shard-00-01.b5tvnqi.mongodb.net:27017,ac-yztvzc4-shard-00-02.b5tvnqi.mongodb.net:27017/?ssl=true&replicaSet=atlas-dbcw9j-shard-0&authSource=admin&retryWrites=true&w=majority`;
-  const dbName = 'test-contacts';
-  await mongoose.connect(MONGODB_URI, { dbName });
-});
-
-beforeEach(async () => {
-  await User.deleteMany({});
-
-  const user = new User({
-    email: 'test@test.com',
-    password: 'tester',
-    username: 'Test',
-    posts: [],
-    _id: '5c0f66b979af55031b34728a',
-  });
-  await user.save();
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-});
+// import validate from '../../../../src/lib/validators'; // import validate from 'validate.js';  //NB: dont import validate directly
+// import { validationSchema as authSignupValidation } from '../../../../src/apis/auth/controllers/authSignup.validation';
+// import { validationSchema as authLoginValidation } from '../../../../src/apis/auth/controllers/authLogin.validation';
+// import User from '../../../../src/lib/models/user';
+// import { jsonApiErrorResponseFromValidateJsError } from '../../../../src/lib/helpers/jsonApiErrorResponseFromValidateJsError';
+// import { findUser } from '../../../../src/apis/auth/helpers/findUser';
+// import { getEmailTransporter } from '../../../../src/lib/helpers/getEmailTransporter';
+// import { IError } from '../../../../src/lib/interfaces/IError';
+import { CartItem } from '../../../../src/lib/interfaces/ICartItem';
 
 describe('auth controller', () => {
-  describe('login()', () => {});
+  describe('login()', () => {
+    const req = {
+      body: {
+        data: {
+          attributes: {
+            email: 'info@internet.com',
+            password: '123',
+            username: 'someone',
+          },
+        },
+      },
+    };
 
-  describe('signup()', () => {});
+    const res = {
+      json: vi.fn(),
+    };
 
-  describe('resetPassword()', () => {});
+    const next = vi.fn();
+    const validate = vi.fn();
+    const findUser = vi.fn();
+    const authenticateUser = vi.fn();
+    const generateToken = vi.fn();
 
-  describe('saveNewPassword()', () => {});
+    it('happy case: should return response that has "token"', async () => {
+      validate.mockResolvedValue(undefined);
+      findUser.mockResolvedValue({
+        _id: 'user_id',
+        email: 'info@internet.com',
+        password: '123',
+        username: 'someone',
+        cart: {
+          items: Array<CartItem>,
+        },
+        products: Array<Types.ObjectId>,
+      });
+      authenticateUser.mockResolvedValue(true);
+      generateToken.mockResolvedValue('abcdefg');
+      res.json.mockResolvedValue({
+        meta: {
+          token: 'abcdefg',
+          message: 'User successfully logged in.',
+        },
+      });
+
+      await login(req, res, next);
+    });
+  });
+
+  // describe('signup()', () => {});
+
+  // describe('resetPassword()', () => {});
+
+  // describe('saveNewPassword()', () => {});
 });

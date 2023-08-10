@@ -1,17 +1,19 @@
-import { it, expect, describe} from 'vitest';
+import { it, expect, describe } from 'vitest';
 import jwt from 'jsonwebtoken';
 
-import { isAuth } from '../../src/lib/middleware/isAuth';
+import { isAuth } from '../../../src/lib/middleware/isAuth';
 import sinon from 'sinon';
 
 describe('isAuth()', () => {
   it('should throw an error if there is no request authorisation header present', () => {
     const req = {
-      get: () => {
-        return null;
+      get: (x) => {
+        if (x === 'Authorization') {
+          return undefined;
+        }
       },
     };
-    expect(() => isAuth(req, {}, () => {})).toThrow('Not Authenticated');
+    expect(() => isAuth(req, {}, () => {})).toThrowError('Not Authorized - token error');
   });
 
   it('should throw an error if the authorization header is a string', () => {
@@ -50,6 +52,7 @@ describe('isAuth()', () => {
     // Mock jwt.verify inside jsonwebtoken module
     sinon.stub(jwt, 'verify');
     jwt.verify.returns({ userId: 'abc' });
+
     isAuth(req, {}, () => {});
     expect(req).toHaveProperty('userId', 'abc');
     expect(jwt.verify.called).toBe(true);

@@ -8,7 +8,8 @@ import { validationSchema as ProductValidation } from './products.validation';
 import { IError } from '../../../lib/interfaces/IError';
 import { IRequest } from '../../../lib/interfaces/IRequest';
 import { deleteFile } from '../../../lib/helpers/deleteFile';
-import { IUser, IUserDocument } from '../../auth/interfaces/IUser';
+import { IUserDocument } from '../../../lib/interfaces/IUser';
+import { IProduct } from '../interfaces/IProduct';
 
 //Mongoose selective retrieval - tells mongoose whIUserDocumentich props to retrieve (selective) or which not to retrieve
 //Product.find().select('title price -_id'); //return title, price, not _id
@@ -57,23 +58,24 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
 export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
   const prodId = req.params.productId;
 
-  try {
-    const product = await Product.findById(prodId);
-
-    console.log('BACKEND product: ', product);
-
-    if (product.userId.toString() !== req.userId) {
-      //meaning loggedin user is not authorised to edit this product
-      const error: IError = new Error('unauthorized action for this logged in user');
-      error.statusCode = 500;
-      throw error;
-    }
-
-    return res.status(200).json({ message: 'fetched product.', product });
-  } catch (err) {
-    console.log(err);
-    return res.status(404).json({ error: err });
+  //1. find product
+  const product: IProduct | null = await Product.findById(prodId);
+  if (!product) {
+    const error: IError = new Error('Product not found');
+    error.statusCode = 404;
+    return next(error);
   }
+
+  //2. check if products' userId is same as request userId
+  if (product.userId.toString() !== req.userId) {
+    //meaning loggedin user is not authorised to edit this product
+    const error: IError = new Error('unauthorized action for this logged in user');
+    error.statusCode = 500;
+    return next(error);
+  }
+
+  //3. return product
+  return res.status(200).json({ message: 'fetched product.', product });
 };
 
 //addProduct should receive an upload image

@@ -1,5 +1,8 @@
 import { Request } from 'express';
 
-export interface IRequest extends Request {
+export interface IRequest {
   userId?: string;
+  body: {
+    data?: Record<string, any>;
+  };
 }

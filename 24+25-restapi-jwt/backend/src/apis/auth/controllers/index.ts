@@ -2,19 +2,16 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { Document } from 'mongoose';
-// import validate from 'validate.js';  //NB: dont import validate directly
 
+import validate from '../../../lib/validators'; // import validate from 'validate.js';  //NB: dont import validate directly
 import { validationSchema as authSignupValidation } from './authSignup.validation';
 import { validationSchema as authLoginValidation } from './authLogin.validation';
-import validate from '../../../lib/validators';
 import User from '../../../lib/models/user';
-import { makeJsonapiErrorsResponse } from '../../../lib/helpers/makeJsonapiErrorsResponse';
-import { IValidatejsError } from '../../../lib/helpers/makeJsonapiErrorsResponse';
-import { findUserByEmail } from '../helpers/findUserByEmail';
+import { jsonApiErrorResponseFromValidateJsError } from '../../../lib/helpers/jsonApiErrorResponseFromValidateJsError';
+import { findUser } from '../helpers/findUser';
 import { getEmailTransporter } from '../../../lib/helpers/getEmailTransporter';
 import { IError } from '../../../lib/interfaces/IError';
-import { IUser } from '../interfaces/IUser';
+import { IUser } from '../../../lib/interfaces/IUser';
 
 // -------------------------------------------------------------------------------------------------
 
@@ -36,16 +33,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
   //1. validate
   try {
-    await validate.async(resourceAttributes, authLoginValidation, {
+    await validate(resourceAttributes, authLoginValidation, {
       format: 'detailed',
-    } as validate.AsyncValidateOption);
+    });
   } catch (errors: any) {
-    const formattedErrors = makeJsonapiErrorsResponse(errors as Array<IValidatejsError>);
-    return res.status(422).json({ errors: formattedErrors });
+    const formattedResponse = { errors: jsonApiErrorResponseFromValidateJsError(errors) };
+    return res.status(422).json(formattedResponse);
   }
 
   //2. make sure user exists
-  const user: IUser | null = await findUserByEmail(email);
+  const user: IUser | null = await findUser({ email });
   if (!user) {
     const error: IError = new Error('user does not exist');
     error.statusCode = 404;
@@ -86,7 +83,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       message: 'User successfully logged in.',
     },
   };
-  return res.status(200).json(formattedResponse);
+  return res.json(formattedResponse);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -127,7 +124,7 @@ const sendSignupEmail = (email: string) => {
         } else {
           resolve(info);
         }
-      }
+      },
     );
   });
 };
@@ -142,14 +139,12 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
       format: 'detailed',
     } as validate.AsyncValidateOption);
   } catch (errors: any) {
-    const response = makeJsonapiErrorsResponse(errors as Array<IValidatejsError>);
-    const formattedResponse = { errors: response };
-
+    const formattedResponse = { errors: jsonApiErrorResponseFromValidateJsError(errors) };
     return res.status(422).json(formattedResponse);
   }
 
   //2. check if user exists
-  const user: IUser | null = await findUserByEmail(email);
+  const user: IUser | null = await findUser({ email });
   if (user) {
     const error: IError = new Error('account exists');
     error.statusCode = 409; //conflict
@@ -215,7 +210,7 @@ const createResetToken = async () => {
 
 const updateUserResetToken = async (user: IUser, token: string) => {
   user.resetToken = token;
-  user.resetTokenExpiration = Date.now() + 3600000;
+  user.resetTokenExpiration = Date.now() + 60 * 60 * 1000; //UTC time + 1 hour (in milliseconds)
   return user.save();
 };
 
@@ -253,7 +248,7 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
   //2. find user
   let user: IUser | null;
   try {
-    user = await findUserByEmail(email);
+    user = await findUser({ email });
   } catch (err: any) {
     const error: IError = new Error('user not found');
     error.statusCode = err.status;

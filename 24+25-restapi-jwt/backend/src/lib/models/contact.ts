@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-import { IContact } from '../../apis/contacts/interfaces/IContact';
+import { IContact } from '../interfaces/IContact';
 import DateHelper from '../helpers/DateHelper';
 
 const contactSchema = new Schema<IContact>(
@@ -36,7 +36,7 @@ const contactSchema = new Schema<IContact>(
     },
   },
 
-  { timestamps: false, strict: false, shardKey: { clientId: 1 } } //1 ascending, -1 descending
+  { timestamps: false, strict: false, shardKey: { clientId: 1 } }, //1 ascending, -1 descending
 );
 
 export default mongoose.model<IContact>('Contact', contactSchema);

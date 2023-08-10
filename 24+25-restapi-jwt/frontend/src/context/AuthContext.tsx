@@ -1,13 +1,12 @@
 import React, { useState, createContext, useEffect } from 'react';
-import { checkTokenValidity } from '../global/helpers/checkTokenValidity';
+import { checkTokenValidity } from '../lib/helpers/checkTokenValidity';
 
 interface AuthContextData {
   loggedIn: boolean;
+  setLoggedIn: (val: Boolean) => {};
 }
 
-export const AuthContext = createContext<AuthContextData>(
-  {} as AuthContextData
-);
+export const AuthContext = createContext({} as AuthContextData);
 
 export const AuthContextProvider: React.FC = (props) => {
   const token = localStorage.getItem('token');
@@ -19,7 +18,7 @@ export const AuthContextProvider: React.FC = (props) => {
 
   const [loggedIn, setLoggedIn] = useState(isTokenValid); // Initialize loggedIn with a default value of false
 
-  const stuffToShare: AuthContextData = {
+  const stuffToShare = {
     loggedIn,
     setLoggedIn,
   };

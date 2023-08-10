@@ -6,8 +6,8 @@ import { IError } from '../interfaces/IError';
 
 export const isAuth = (req: Request, res: Response, next: NextFunction) => {
   //test if authorization header is present
-  const authHeader = req.get('Authorization');
 
+  const authHeader = req.get('Authorization');
   if (!authHeader) {
     const error: IError = new Error('Not Authorized - token error');
     error.statusCode = 401;

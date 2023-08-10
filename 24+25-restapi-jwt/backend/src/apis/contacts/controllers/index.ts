@@ -3,16 +3,16 @@ import { NextFunction, Request, Response } from 'express';
 // import validate from 'validate.js'; //NB: do not import directly
 
 import { validationSchema as contactValidation } from './contact.validation';
-import { findContactByEmail } from '../helpers/findContactByEmail';
+import { findContact } from '../helpers/findContact';
 import validate from '../../../lib/validators';
 import Contact from '../../../lib/models/contact';
 import { ITenant } from '../../tenants/interfaces/ITenant';
 import { IError } from '../../../lib/interfaces/IError';
-import { IContact } from '../interfaces/IContact';
+import { IContact } from '../../../lib/interfaces/IContact';
 import DateHelper from '../../../lib/helpers/DateHelper';
-import { IJsonapiError, makeJsonapiErrorsResponse } from '../../../lib/helpers/makeJsonapiErrorsResponse';
-import { makeJsonapiDataResponse } from '../../../lib/helpers/makeJsonapiDataResponse';
-
+import { jsonApiErrorResponseFromValidateJsError } from '../../../lib/helpers/jsonApiErrorResponseFromValidateJsError';
+import { jsonApiSuccessResponseFromMongooseQuery } from '../../../lib/helpers/jsonApiSuccessResponseFromMongooseQuery';
+import { IJsonApiError } from '../../../lib/interfaces/IJsonApiError';
 // temporary..
 const tenant: ITenant = {
   email: 'test@gmail.com',
@@ -46,12 +46,12 @@ export const createContact = async (req: Request, res: Response, next: NextFunct
       format: 'detailed',
     });
   } catch (errors: any) {
-    const formattedErrors: Array<IJsonapiError> = makeJsonapiErrorsResponse(errors);
+    const formattedErrors: Array<IJsonApiError> = jsonApiErrorResponseFromValidateJsError(errors);
     return res.status(422).json({ errors: formattedErrors });
   }
 
   //2. check if contact already exists
-  const contact: IContact | null = await findContactByEmail(email);
+  const contact: IContact | null = await findContact(email);
   if (contact) {
     const error: IError = new Error('account exists');
     error.statusCode = 409; //conflict
@@ -69,7 +69,7 @@ export const createContact = async (req: Request, res: Response, next: NextFunct
   }
 
   //4. format contact response
-  const response = makeJsonapiDataResponse(newContact);
+  const response = jsonApiSuccessResponseFromMongooseQuery(newContact);
   const formattedResponse = { data: response };
 
   //5. send response
@@ -98,7 +98,7 @@ export const getContacts = async (req: Request, res: Response, next: NextFunctio
 
   //2. format response
   const response = contacts.map((contact) => {
-    return makeJsonapiDataResponse(contact);
+    return jsonApiSuccessResponseFromMongooseQuery(contact);
   });
   const formattedResponse = { data: response };
 
@@ -133,7 +133,7 @@ export const getContact = async (req: Request, res: Response, next: NextFunction
   }
 
   //2. format response
-  const response = makeJsonapiDataResponse(contact);
+  const response = jsonApiSuccessResponseFromMongooseQuery(contact);
   const formattedResponse = { data: response };
 
   //3. send response
@@ -146,7 +146,7 @@ export const getContact = async (req: Request, res: Response, next: NextFunction
 const updateContactById = async (
   clientId: string,
   contactId: string,
-  updateAttributes: Record<string, any>
+  updateAttributes: Record<string, any>,
 ): Promise<IContact | null> => {
   const updatedDocument = await Contact.findOneAndUpdate(
     { clientId: new mongoose.Types.ObjectId(clientId), _id: contactId },
@@ -155,7 +155,7 @@ const updateContactById = async (
       timeStamps: false,
       lean: true,
       new: true,
-    }
+    },
   );
   return updatedDocument;
 };
@@ -168,7 +168,7 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
   //1. validate data
   const validationErrors = validate(resourceAttributes, contactValidation(tenant), { format: 'detailed' });
   if (validationErrors) {
-    const formattedErrors: Array<IJsonapiError> = makeJsonapiErrorsResponse(validationErrors);
+    const formattedErrors: Array<IJsonApiError> = jsonApiErrorResponseFromValidateJsError(validationErrors);
     return res.status(422).json({ errors: formattedErrors });
   }
 
@@ -188,7 +188,7 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
   }
 
   //3. format response
-  const response = makeJsonapiDataResponse(contact);
+  const response = jsonApiSuccessResponseFromMongooseQuery(contact);
   const formattedResponse = { data: response };
 
   //4. send response
@@ -242,7 +242,7 @@ export const deleteContact = async (req: Request, res: Response, next: NextFunct
 //deleteAllContacts
 
 const deleteAllContactsForClient = async (
-  clientId: string
+  clientId: string,
 ): Promise<Query<mongoose.mongo.DeleteResult, IContact> | null> => {
   return await Contact.deleteMany({
     clientId: clientId,

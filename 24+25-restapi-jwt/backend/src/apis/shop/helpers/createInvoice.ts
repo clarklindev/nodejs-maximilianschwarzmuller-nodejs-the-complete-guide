@@ -1,39 +1,10 @@
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import path from 'path';
-/*
-const invoice = {
-  shipping: {
-    name: 'John Doe',
-    address: '1234 Main Street',
-    city: 'San Francisco',
-    state: 'CA',
-    country: 'US',
-    postal_code: 94111,
-  },
-  items: [
-    {
-      item: 'TC 100',
-      description: 'Toner Cartridge',
-      quantity: 2,
-      amount: 6000,
-    },
-    {
-      item: 'USB_EXT',
-      description: 'USB Cable Extender',
-      quantity: 1,
-      amount: 2000,
-    },
-  ],
-  subtotal: 8000,
-  paid: 0,
-  invoice_nr: 1234,
-};
-*/
+import { IInvoice } from '../../../lib/interfaces/IInvoice';
 
-export const createInvoice = (invoice, path) => {
-  let doc = new PDFDocument({ size: 'A4', margin: 50 });
-
+export const createInvoice = (invoice: IInvoice, path: string) => {
+  const doc = new PDFDocument({ size: 'A4', margin: 50 });
   generateHeader(doc);
   generateCustomerInformation(doc, invoice);
   generateInvoiceTable(doc, invoice);
@@ -44,7 +15,7 @@ export const createInvoice = (invoice, path) => {
 };
 
 //static data
-const generateHeader = (doc) => {
+const generateHeader = (doc: PDFKit.PDFDocument) => {
   doc
     .image(path.join('data', 'invoices', 'logo.png'), 50, 45, { width: 50 })
     .fillColor('#444444')
@@ -58,7 +29,7 @@ const generateHeader = (doc) => {
 };
 
 //dynamic data
-const generateCustomerInformation = (doc, invoice) => {
+const generateCustomerInformation = (doc: PDFKit.PDFDocument, invoice: IInvoice) => {
   doc.fillColor('#444444').fontSize(20).text('Invoice', 50, 160);
 
   generateHr(doc, 185);
@@ -69,29 +40,21 @@ const generateCustomerInformation = (doc, invoice) => {
     .fontSize(10)
     .text('Invoice Number:', 50, customerInformationTop)
     .font('Helvetica-Bold')
-    .text(invoice.invoice_nr, 150, customerInformationTop)
+    .text(invoice.invoice_nr.toString(), 150, customerInformationTop)
     .font('Helvetica')
     .text('Invoice Date:', 50, customerInformationTop + 15)
     .text(formatDate(new Date()), 150, customerInformationTop + 15)
     .text('Balance Due:', 50, customerInformationTop + 30)
-    .text(
-      formatCurrency(invoice.subtotal - invoice.paid),
-      150,
-      customerInformationTop + 30
-    )
+    .text(formatCurrency(invoice.subtotal - invoice.paid), 150, customerInformationTop + 30)
 
     .font('Helvetica-Bold')
     .text(invoice.shipping.name, 300, customerInformationTop)
     .font('Helvetica')
     .text(invoice.shipping.address, 300, customerInformationTop + 15)
     .text(
-      invoice.shipping.city +
-        ', ' +
-        invoice.shipping.state +
-        ', ' +
-        invoice.shipping.country,
+      invoice.shipping.city + ', ' + invoice.shipping.state + ', ' + invoice.shipping.country,
       300,
-      customerInformationTop + 30
+      customerInformationTop + 30,
     )
     .moveDown();
 
@@ -99,20 +62,12 @@ const generateCustomerInformation = (doc, invoice) => {
 };
 
 //dynamic data
-const generateInvoiceTable = (doc, invoice) => {
+const generateInvoiceTable = (doc: PDFKit.PDFDocument, invoice: IInvoice) => {
   let i;
   const invoiceTableTop = 330;
 
   doc.font('Helvetica-Bold');
-  generateTableRow(
-    doc,
-    invoiceTableTop,
-    'Item',
-    'Description',
-    'Unit Cost',
-    'Quantity',
-    'Line Total'
-  );
+  generateTableRow(doc, invoiceTableTop, 'Item', 'Description', 'Unit Cost', 'Quantity', 'Line Total');
   generateHr(doc, invoiceTableTop + 20);
   doc.font('Helvetica');
 
@@ -125,70 +80,41 @@ const generateInvoiceTable = (doc, invoice) => {
       item.item,
       item.description,
       formatCurrency(item.amount / item.quantity),
-      item.quantity,
-      formatCurrency(item.amount)
+      item.quantity.toString(),
+      formatCurrency(item.amount),
     );
 
     generateHr(doc, position + 20);
   }
 
   const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-  generateTableRow(
-    doc,
-    subtotalPosition,
-    '',
-    '',
-    'Subtotal',
-    '',
-    formatCurrency(invoice.subtotal)
-  );
+  generateTableRow(doc, subtotalPosition, '', '', 'Subtotal', '', formatCurrency(invoice.subtotal));
 
   const paidToDatePosition = subtotalPosition + 20;
-  generateTableRow(
-    doc,
-    paidToDatePosition,
-    '',
-    '',
-    'Paid To Date',
-    '',
-    formatCurrency(invoice.paid)
-  );
+  generateTableRow(doc, paidToDatePosition, '', '', 'Paid To Date', '', formatCurrency(invoice.paid));
 
   const duePosition = paidToDatePosition + 25;
   doc.font('Helvetica-Bold');
-  generateTableRow(
-    doc,
-    duePosition,
-    '',
-    '',
-    'Balance Due',
-    '',
-    formatCurrency(invoice.subtotal - invoice.paid)
-  );
+  generateTableRow(doc, duePosition, '', '', 'Balance Due', '', formatCurrency(invoice.subtotal - invoice.paid));
   doc.font('Helvetica');
 };
 
 //static data
-const generateFooter = (doc) => {
+const generateFooter = (doc: PDFKit.PDFDocument) => {
   doc
     .fontSize(10)
-    .text(
-      'Payment is due within 15 days. Thank you for your business.',
-      50,
-      780,
-      { align: 'center', width: 500 }
-    );
+    .text('Payment is due within 15 days. Thank you for your business.', 50, 780, { align: 'center', width: 500 });
 };
 
 //dynamic data
 const generateTableRow = (
-  doc,
-  y,
-  item,
-  description,
-  unitCost,
-  quantity,
-  lineTotal
+  doc: PDFKit.PDFDocument,
+  y: number,
+  item: string,
+  description: string,
+  unitCost: string,
+  quantity: string,
+  lineTotal: string,
 ) => {
   doc
     .fontSize(10)
@@ -199,15 +125,15 @@ const generateTableRow = (
     .text(lineTotal, 0, y, { align: 'right' });
 };
 
-const generateHr = (doc, y) => {
+const generateHr = (doc: PDFKit.PDFDocument, y: number) => {
   doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
 };
 
-const formatCurrency = (cents) => {
+const formatCurrency = (cents: number) => {
   return '$' + (cents / 100).toFixed(2);
 };
 
-const formatDate = (date) => {
+const formatDate = (date: Date) => {
   const day = date.getDate();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();

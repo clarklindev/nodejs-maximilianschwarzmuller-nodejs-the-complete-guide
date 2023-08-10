@@ -875,7 +875,7 @@ const fileStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(
       null,
-      DateHelper.filenameFriendlyDate(new Date()) + '__' + file.originalname //create unique filename
+      DateHelper.filenameFriendlyUTCDate(new Date()) + '__' + file.originalname, //create unique filename
     ); //file.filename is the new name multer gives
   },
 });
@@ -922,7 +922,6 @@ exports.updatePost = (req, res, next) => {
 ## deleting with postman
 
 - if you delete db image references with postman, dont forget to cleanup the images/ folder on the backend server
-
 
 ---
 

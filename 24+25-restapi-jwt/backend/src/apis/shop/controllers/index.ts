@@ -1,13 +1,13 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import PDFDocument from 'pdfkit';
 
 import Product from '../../../lib/models/product';
 import Order from '../../../lib/models/order';
 import { CartItem } from '../../../lib/models/user';
-import { createInvoice } from '../../../lib/helpers/createInvoice';
+import { createInvoice } from '../helpers/createInvoice';
 import { ErrorWithStatus } from '../../../lib/interfaces/ErrorWithStatus';
+import { IInvoice } from '../../../lib/interfaces/IInvoice';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   const currentPage = +req.query.page | 1;
@@ -167,7 +167,7 @@ export const getInvoice = async (req: Request, res: Response, next: NextFunction
     res.setHeader('Content-Disposition', `${mode}; filename="${invoiceName}"`); //inline or attachment
 
     //generate pdf on the fly
-    const invoiceData = {
+    const invoiceData: IInvoice = {
       shipping: {
         name: 'John Doe',
         address: '1234 Main Street',

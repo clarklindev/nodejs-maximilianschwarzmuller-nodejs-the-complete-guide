@@ -1,6 +1,7 @@
 import DateHelper from './DateHelper';
 
-export const makeJsonapiDataResponse = (object: any) => {
+//takes in object
+export const jsonApiSuccessResponseFromMongooseQuery = (object: Record<string, any>) => {
   const { _id, createdAt, updatedAt, ...attributes } = object;
 
   const attributeData: Record<string, any> = {
@@ -10,13 +11,13 @@ export const makeJsonapiDataResponse = (object: any) => {
   // Include createdAt and updatedAt only if they exist on the object
   if (createdAt in object) {
     attributeData.timestamps = {
-      created: DateHelper.unixEpochToRFC3339_ISO8601(createdAt),
+      created: DateHelper.unixEpochToUTCDate(createdAt),
     };
   }
   if (updatedAt in object) {
     attributeData.timestamps = {
       ...attributeData.timestamps,
-      modified: DateHelper.unixEpochToRFC3339_ISO8601(updatedAt),
+      modified: DateHelper.unixEpochToUTCDate(updatedAt),
     };
   }
 

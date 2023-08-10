@@ -2,16 +2,17 @@ import React, { useContext, useEffect } from 'react';
 import { NavLink, Form, useActionData, useNavigate } from 'react-router-dom';
 
 import styles from './Login.module.css';
-import { ILoginResponse } from '../../interfaces/ILoginResponse';
-import { formDataToJsonApi } from '../../global/helpers/formDataToJsonApi';
+import { formDataToJsonApi } from '../../lib/helpers/formDataToJsonApi';
 import { AuthContext } from '../../context/AuthContext';
+import { IJsonApiResponse } from '../../interfaces/IJsonApiResponse';
 
 export const Login = () => {
-  const data = useActionData();
+  const actionData = useActionData();
+
   const { loggedIn, setLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const token = data?.token;
+  const token = actionData?.token;
 
   useEffect(() => {
     console.log('calls this..');
@@ -50,7 +51,7 @@ export const Login = () => {
           Dont have an account? <NavLink to='/auth/signup'>Sign up</NavLink>
         </div>
       </Form>
-      {data && data.error && <p>{data.error}</p>}
+      {actionData && actionData.error && <p>{actionData.error}</p>}
     </div>
   );
 };
@@ -63,15 +64,18 @@ export const action = async ({ request }) => {
   }/auth/login`;
 
   const jsonData = formDataToJsonApi(data, 'user');
-
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/vnd.api+json' }, //format of what we sending
     body: JSON.stringify(jsonData),
   });
+  const jsonapiResponse: IJsonApiResponse | undefined = await response.json();
+  console.log('jsonapiResponse: ', jsonapiResponse);
 
-  const json = await response.json();
-  localStorage.setItem('token', json.token);
+  //set token in localstorage
+  const token = jsonapiResponse.meta.token;
+  localStorage.setItem('token', token);
 
-  return json;
+  //send back to rendering function as useActionData()
+  return { token };
 };

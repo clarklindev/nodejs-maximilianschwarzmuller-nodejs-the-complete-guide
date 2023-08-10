@@ -6,22 +6,19 @@ import {
   Route,
 } from 'react-router-dom';
 
-// layouts
+//layouts
 import { HomeLayout } from './layouts/HomeLayout';
 import { HelpLayout } from './layouts/HelpLayout';
 import { ProductsLayout } from './layouts/ProductsLayout';
-
-// pages
+//pages
 import { About } from './pages/About';
 import { NotFound } from './pages/NotFound';
 import { Faq } from './pages/help/Faq';
 import { Contact, action as contactAction } from './pages/help/Contact';
-
 //shop
 import { Orders } from './pages/shop/Orders';
 import { Cart } from './pages/shop/Cart';
 import { Shopping, loader as shoppingLoader } from './pages/shop/Shopping';
-
 //admin
 import { Products, loader as productsLoader } from './pages/products/Products';
 import {
@@ -34,7 +31,6 @@ import {
   AddProduct,
   action as addProductAction,
 } from './pages/products/AddProduct';
-
 //auth
 import { Login, action as loginAction } from './pages/auth/Login';
 import { SignUp, action as signupAction } from './pages/auth/SignUp';
