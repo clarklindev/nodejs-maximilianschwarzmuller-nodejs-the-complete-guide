@@ -10,18 +10,18 @@ import authRoutes from './apis/auth/routes';
 import contactRoutes from './apis/contacts/routes';
 import { IError } from './lib/interfaces/IError';
 import { jsonApiErrorResponseFromError } from './lib/helpers/jsonApiErrorResponseFromError';
-import { enableMulter } from './lib/middleware/enableMulter';
-import { enableDatabase } from './lib/middleware/enableDatabase';
+import { initMulter } from './lib/middleware/initMulter';
+import { initDatabase } from './lib/middleware/initDatabase';
 
 //enable environment variables
 dotenv.config();
 
 const app: Express = express();
 
-//database
+//connect to database
 const MONGODB_URI = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@ac-yojaa83-shard-00-00.7tcuhtv.mongodb.net:27017,ac-yojaa83-shard-00-01.7tcuhtv.mongodb.net:27017,ac-yojaa83-shard-00-02.7tcuhtv.mongodb.net:27017/?ssl=true&replicaSet=atlas-1131uo-shard-0&authSource=admin&retryWrites=true&w=majority`;
 const databaseName = 'shop';
-app.use(enableDatabase(MONGODB_URI, databaseName));
+app.use(initDatabase(MONGODB_URI, databaseName));
 
 //start express server
 try {
@@ -49,14 +49,14 @@ app.use(express.static(path.join(__dirname, '../', 'public')));
 app.use('/images', express.static(path.join(__dirname, '../', 'images'))); //serving files as if from root folder but we need /images says we are looking in /images on root
 
 //multer (multipart form-handling related)
-//enableMulter(folder, inputFieldName)
+//initMulter(folder, inputFieldName)
 //props: folder - folder to store files being uploaded (relative to root folder)
 //props: inputFieldName - name of the input on the form that is handling the file upload
-app.use(enableMulter('images', 'upload'));
+app.use(initMulter('images', 'upload'));
 
 // routes
-app.use('/contacts', contactRoutes);
 app.use('/auth', authRoutes);
+app.use('/contacts', contactRoutes);
 app.use('/products', productRoutes);
 app.use('/shop', shopRoutes);
 

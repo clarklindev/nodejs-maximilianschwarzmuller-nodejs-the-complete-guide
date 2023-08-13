@@ -33,7 +33,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 //multer() returns a middleware (req, res, (error)=>{})
 //note: 'upload' corresponds to form element name for input that contains the file being uploaded.
 //inputFieldName - name of the input on the form that is handling the file upload
-export const enableMulter = (folder: string, inputFieldName: string) => {
+export const initMulter = (folder: string, inputFieldName: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     multer({
       storage: fileStorage(folder),

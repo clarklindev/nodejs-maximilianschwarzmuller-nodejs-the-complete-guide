@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 
 import { IError } from '../interfaces/IError';
 
-export const enableDatabase = (uri: string, databaseName: string) => {
+export const initDatabase = (uri: string, databaseName: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     //connect to db
     try {

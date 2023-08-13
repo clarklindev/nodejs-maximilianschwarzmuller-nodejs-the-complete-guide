@@ -1,7 +1,7 @@
 import { IError } from '../interfaces/IError';
 import { IJsonApiError } from '../interfaces/IJsonApiError';
 
-//returns error
+//returns error (singular)
 export const jsonApiErrorResponseFromError = (error: IError, meta?: Record<string, any>) => {
   const jsonApiErrorResponse: IJsonApiError = {
     id: error.name,

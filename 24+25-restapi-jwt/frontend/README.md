@@ -329,3 +329,8 @@ if (!isTokenExpired(token)) {
 // Clear the token from storage on logout
 localStorage.removeItem('token');
 ```
+
+### crossroads for state
+
+- you can choose between using custom hooks or context/state management like redux.
+- i initially went with auth context but im switching to custom hooks because it seems cleaner

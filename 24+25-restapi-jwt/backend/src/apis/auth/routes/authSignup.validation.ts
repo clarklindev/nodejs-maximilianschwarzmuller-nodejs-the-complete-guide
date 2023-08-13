@@ -6,7 +6,7 @@ export const validationSchema = {
   email: {
     presence: true,
     email: true,
-    emailAvailable: true,
+    emailAvailable: true, //this uses a custom validator that is async (which means caller needs to be async)
   },
 
   password: {

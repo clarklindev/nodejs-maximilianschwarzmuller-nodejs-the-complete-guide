@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { IError } from '../interfaces/IError';
 //frontend sends token with header to backend where this middleware intercepts before routing...

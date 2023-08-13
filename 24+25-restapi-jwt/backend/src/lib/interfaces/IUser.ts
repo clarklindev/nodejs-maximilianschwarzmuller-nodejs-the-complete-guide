@@ -1,5 +1,5 @@
 import { Document, Model, Types } from 'mongoose'; //import Document is NB
-import { CartItem } from '../../shop/interfaces/ICartItem';
+import { CartItem } from './ICartItem';
 
 // Interface representing the User document in MongoDB
 export interface IUser extends Document {

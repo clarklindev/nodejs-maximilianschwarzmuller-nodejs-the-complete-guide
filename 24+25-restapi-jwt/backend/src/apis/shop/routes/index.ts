@@ -15,7 +15,7 @@ import { isAuth } from '../../../lib/middleware/isAuth';
 
 const router = express.Router();
 
-// router.get('/', getProducts);
+router.get('/', getProducts);
 router.get('/:productId', getProduct);
 
 router.get('/cart', isAuth, getCart);

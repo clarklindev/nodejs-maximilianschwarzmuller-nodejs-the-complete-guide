@@ -34,11 +34,14 @@ type JsonapiLoginSuccessMeta = {
   token: string;
 };
 
-export interface IJsonapiSuccess<T = object | undefined> {
+export interface IJsonapiSuccess {
   data: {
     id: string;
     type: string;
     attributes: Record<string, any>;
   };
-  meta?: T;
+  meta?: {
+    token?: string;
+    message?: string;
+  };
 }

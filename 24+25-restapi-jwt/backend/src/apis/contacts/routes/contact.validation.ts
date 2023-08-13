@@ -1,4 +1,4 @@
-import { ITenant } from '../../tenants/interfaces/ITenant';
+import { ITenant } from '../../../lib/interfaces/ITenant';
 
 export const validationSchema = (tenant: ITenant) => {
   const constraints = {

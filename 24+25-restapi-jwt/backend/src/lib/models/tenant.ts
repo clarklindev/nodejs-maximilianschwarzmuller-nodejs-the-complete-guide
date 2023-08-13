@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-import { ITenant } from '../../apis/tenants/interfaces/ITenant';
+import { ITenant } from '../interfaces/ITenant';
 import DateHelper from '../helpers/DateHelper';
 import contactSchema from './contact';
 const tenantSchema = new Schema<ITenant>(
@@ -36,7 +36,7 @@ const tenantSchema = new Schema<ITenant>(
     },
   },
 
-  { timestamps: false, strict: false, shardKey: { clientId: 1 } } //1 ascending, -1 descending
+  { timestamps: false, strict: false, shardKey: { clientId: 1 } }, //1 ascending, -1 descending
 );
 
 export default mongoose.model<ITenant>('Tenant', tenantSchema);

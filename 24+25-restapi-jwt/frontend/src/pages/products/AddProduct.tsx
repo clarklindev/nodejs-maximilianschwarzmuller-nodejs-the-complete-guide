@@ -2,6 +2,7 @@ import React from 'react';
 import { Form, redirect } from 'react-router-dom';
 
 import styles from './AddProduct.module.css';
+import { formDataToJsonApi } from '../../lib/helpers/formDataToJsonApi';
 
 export const AddProduct = () => {
   return (
@@ -39,10 +40,15 @@ export const AddProduct = () => {
 };
 
 export const action = async ({ request }) => {
-  const formData = await request.formData();
+  const data = await request.formData();
+  const formData = new FormData();
+
+  formData.append('title', data.get('title'));
+  formData.append('description', data.get('description'));
+  formData.append('price', data.get('price'));
+  const jsonData = formDataToJsonApi(formData, 'product');
 
   //check if formData.
-
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_BACKEND_PORT
   }/products`;
@@ -50,7 +56,7 @@ export const action = async ({ request }) => {
   // //send post request
   const result = await fetch(url, {
     method: 'POST',
-    body: formData,
+    body: JSON.stringify(jsonData),
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
@@ -59,6 +65,6 @@ export const action = async ({ request }) => {
   if (result.ok) {
     return redirect('/products');
   }
-  const data = await result.json();
-  return data;
+
+  return await result.json();
 };

@@ -1,12 +1,23 @@
 import React from 'react';
-import { NavLink, Form, useActionData, redirect } from 'react-router-dom';
+import { NavLink, Form, useActionData, useNavigate } from 'react-router-dom';
 
 import styles from './SignUp.module.css';
-import { UserAttributes } from '../../interfaces/UserAttributes';
 import { formDataToJsonApi } from '../../lib/helpers/formDataToJsonApi';
+import { useToken } from '../../shared/hooks/useToken';
+import { IJsonApiResponse } from '../../interfaces/IJsonApiResponse';
 
 export const SignUp = () => {
-  const data = useActionData();
+  const actionData = useActionData();
+  const [_, setToken] = useToken();
+
+  const navigate = useNavigate();
+
+  if (actionData.meta) {
+    const token = actionData.meta.token;
+    setToken(token);
+
+    navigate('/');
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -40,7 +51,7 @@ export const SignUp = () => {
           account already exists? <NavLink to='/auth/login'>Login</NavLink>
         </div>
       </Form>
-      {data && data.error && <p>{data.error}</p>}
+      {actionData && actionData.errors && <p>{actionData.errors}</p>}
     </div>
   );
 };
@@ -48,25 +59,22 @@ export const SignUp = () => {
 export const action = async ({ request }) => {
   const data = await request.formData();
 
+  //limit what we send back to server by creating a new FormData() instance
   const formData = new FormData();
   formData.append('username', data.get('username'));
   formData.append('email', data.get('email'));
   formData.append('password', data.get('password'));
+  const jsonData = formDataToJsonApi(formData, 'user');
 
   const url = `${import.meta.env.VITE_BACKEND_URL}:${
     import.meta.env.VITE_BACKEND_PORT
   }/auth/signup`;
-
-  const jsonData = formDataToJsonApi<UserAttributes>(formData, 'user');
-
-  const result = await fetch(url, {
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/vnd.api+json' },
     body: JSON.stringify(jsonData),
   });
 
-  if (!result.status === 'OK') {
-    return result;
-  }
-  return redirect('/');
+  const responseJSON: IJsonApiResponse | undefined = await response.json(); // Parse the JSON response body
+  return responseJSON;
 };

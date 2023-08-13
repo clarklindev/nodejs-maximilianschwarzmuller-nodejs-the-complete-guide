@@ -1,26 +1,23 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { NavLink, Form, useActionData, useNavigate } from 'react-router-dom';
 
 import styles from './Login.module.css';
 import { formDataToJsonApi } from '../../lib/helpers/formDataToJsonApi';
-import { AuthContext } from '../../context/AuthContext';
+import { useToken } from '../../shared/hooks/useToken';
 import { IJsonApiResponse } from '../../interfaces/IJsonApiResponse';
 
 export const Login = () => {
   const actionData = useActionData();
+  const [_, setToken] = useToken();
 
-  const { loggedIn, setLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const token = actionData?.token;
+  if (actionData.meta !== undefined) {
+    const token = actionData.meta.token;
+    setToken(token);
 
-  useEffect(() => {
-    console.log('calls this..');
-    if (!!token) {
-      setLoggedIn(true);
-      navigate('/');
-    }
-  }, [token]);
+    navigate('/');
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -51,7 +48,7 @@ export const Login = () => {
           Dont have an account? <NavLink to='/auth/signup'>Sign up</NavLink>
         </div>
       </Form>
-      {actionData && actionData.error && <p>{actionData.error}</p>}
+      {actionData && actionData.errors && <p>{actionData.errors}</p>}
     </div>
   );
 };
@@ -59,23 +56,21 @@ export const Login = () => {
 export const action = async ({ request }) => {
   const data = await request.formData();
 
-  const url = `${import.meta.env.VITE_BACKEND_URL}:${
-    import.meta.env.VITE_BACKEND_PORT
-  }/auth/login`;
+  //limit what we send back to server by creating a new FormData() instance
+  const formData = new FormData();
+  formData.append('email', data.get('email'));
+  formData.append('password', data.get('password'));
+  const jsonData = formDataToJsonApi(formData, 'user');
 
-  const jsonData = formDataToJsonApi(data, 'user');
+  const url = `${import.meta.env.VITE_BACKEND_URL}:
+    ${import.meta.env.VITE_BACKEND_PORT}/auth/login`;
+
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/vnd.api+json' }, //format of what we sending
     body: JSON.stringify(jsonData),
   });
-  const jsonapiResponse: IJsonApiResponse | undefined = await response.json();
-  console.log('jsonapiResponse: ', jsonapiResponse);
 
-  //set token in localstorage
-  const token = jsonapiResponse.meta.token;
-  localStorage.setItem('token', token);
-
-  //send back to rendering function as useActionData()
-  return { token };
+  const responseJSON: IJsonApiResponse | undefined = await response.json();
+  return responseJSON;
 };

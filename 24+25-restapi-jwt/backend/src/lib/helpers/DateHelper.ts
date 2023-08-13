@@ -3,9 +3,9 @@
 class DateHelper {
   //Date -> ISO-Date string
   static filenameFriendlyUTCDate = (date: Date) => {
-    const isoString = date.toISOString(); //returns UTC
-    const friendlyFilename = isoString.replace(/:/g, '_');
-    return friendlyFilename; //eg. 2022-03-01T06_30_00.000Z
+    const isoString = date.toISOString();
+    const friendlyFilename = isoString.replace(/:/g, '_').replace('T', '_UTC_');
+    return friendlyFilename; // e.g., 2022-03-01_UTC_06_30_00.000Z
   };
 
   //unix epoch (seconds) to ISO-Date string

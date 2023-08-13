@@ -9,6 +9,7 @@ export const checkTokenValidity = (token: string) => {
   }
 
   // Step 2: Decode the payload (middle part)
+  //atob() is used to decode 64bit encoded data..
   const payload = JSON.parse(atob(tokenParts[1]));
   if (!payload || !payload.exp) {
     // Invalid payload or missing expiration time

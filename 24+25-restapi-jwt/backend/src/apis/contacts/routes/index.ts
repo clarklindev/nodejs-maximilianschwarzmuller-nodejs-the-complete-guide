@@ -1,11 +1,10 @@
 import express from 'express';
 
+import { validationSchema as contactValidation } from './contact.validation';
 import { isAuth } from '../../../lib/middleware/isAuth';
 import { checkRequestFormat } from '../../../lib/middleware/checkRequestFormat';
 import { validateRequestData } from '../../../lib/middleware/validateRequestData';
-import { validationSchema as contactValidation } from './../controllers/contact.validation';
-import { ITenant } from '../../tenants/interfaces/ITenant';
-
+import { ITenant } from '../../../lib/interfaces/ITenant';
 import {
   createContact,
   getContact,

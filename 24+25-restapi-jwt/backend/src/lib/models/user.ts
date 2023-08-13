@@ -1,5 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
-import { IUser } from '../../apis/auth/interfaces/IUser';
+import { IUser } from '../interfaces/IUser';
 
 export interface CartItem {
   productId: Types.ObjectId;

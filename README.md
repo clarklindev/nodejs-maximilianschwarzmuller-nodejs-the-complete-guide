@@ -1,5 +1,12 @@
 # README
 
+NOTE: (2023-08-06) 24+25-restapi-jwt/
+folder has been separated into 2 separate repositories
+frontend: https://github.com/clarklindev/nodejs-maximilianschwarzmuller-nodejs-the-complete-guide-frontend.git
+backend: https://github.com/clarklindev/nodejs-maximilianschwarzmuller-nodejs-the-complete-guide-backend.git
+
+---
+
 - I have deviated from the course a bit, customized the interface, backend and frontend to cater for my own requirments.
 
   - validation - im using validatejs

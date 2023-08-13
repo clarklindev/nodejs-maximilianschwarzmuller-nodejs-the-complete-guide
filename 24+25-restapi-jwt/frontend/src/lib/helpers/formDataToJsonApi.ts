@@ -6,16 +6,18 @@ interface JsonApiResource {
 }
 
 export function formDataToJsonApi(formData: FormData, resourceType: string) {
+  //convert formData
+  const transformedData = [...formData.entries()].map((entry) => {
+    const [key, value] = entry;
+    return { key, value };
+  });
+
   const jsonData: JsonApiResource = {
     data: {
       type: resourceType,
-      attributes: {},
+      attributes: transformedData,
     },
   };
-
-  for (const [name, value] of formData.entries()) {
-    jsonData.data.attributes[name] = value;
-  }
 
   return jsonData;
 }
