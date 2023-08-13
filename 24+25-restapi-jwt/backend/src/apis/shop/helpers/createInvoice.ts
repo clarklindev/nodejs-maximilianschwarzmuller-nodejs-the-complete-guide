@@ -1,7 +1,7 @@
 import fs from 'fs';
 import PDFDocument from 'pdfkit';
 import path from 'path';
-import { IInvoice } from '../../../lib/interfaces/IInvoice';
+import { IInvoice } from '../interfaces/IInvoice';
 
 export const createInvoice = (invoice: IInvoice, path: string) => {
   const doc = new PDFDocument({ size: 'A4', margin: 50 });

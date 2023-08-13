@@ -1,11 +1,12 @@
 import { Document, Model, Types } from 'mongoose'; //import Document is NB
-import { CartItem } from './ICartItem';
+import { CartItem } from '../../shop/interfaces/ICartItem';
 
 // Interface representing the User document in MongoDB
 export interface IUser extends Document {
   email: string;
   password: string;
   username: string;
+  verified: boolean;
   resetToken?: string | null;
   resetTokenExpiration?: number | null;
   cart: {

@@ -8,7 +8,7 @@ import { validationSchema as ProductValidation } from './products.validation';
 import { IError } from '../../../lib/interfaces/IError';
 import { IRequest } from '../../../lib/interfaces/IRequest';
 import { deleteFile } from '../../../lib/helpers/deleteFile';
-import { IUserDocument } from '../../../lib/interfaces/IUser';
+import { IUserDocument } from '../../auth/interfaces/IUser';
 import { IProduct } from '../interfaces/IProduct';
 
 //Mongoose selective retrieval - tells mongoose whIUserDocumentich props to retrieve (selective) or which not to retrieve

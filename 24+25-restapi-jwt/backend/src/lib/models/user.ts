@@ -1,5 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
-import { IUser } from '../interfaces/IUser';
+import { IUser } from '../../apis/auth/interfaces/IUser';
 
 export interface CartItem {
   productId: Types.ObjectId;
@@ -20,6 +20,11 @@ const userSchema = new Schema<IUser>(
     username: {
       type: String,
       required: true,
+    },
+
+    verified: {
+      type: Boolean,
+      default: false,
     },
 
     resetToken: {

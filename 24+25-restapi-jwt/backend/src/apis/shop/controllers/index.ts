@@ -7,7 +7,7 @@ import Order from '../../../lib/models/order';
 import { CartItem } from '../../../lib/models/user';
 import { createInvoice } from '../helpers/createInvoice';
 import { ErrorWithStatus } from '../../../lib/interfaces/ErrorWithStatus';
-import { IInvoice } from '../../../lib/interfaces/IInvoice';
+import { IInvoice } from '../interfaces/IInvoice';
 
 export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
   const currentPage = +req.query.page | 1;

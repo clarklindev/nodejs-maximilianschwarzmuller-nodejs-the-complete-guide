@@ -2,25 +2,11 @@ import mongoose, { Query } from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 // import validate from 'validate.js'; //NB: do not import directly
 
-import { validationSchema as contactValidation } from './contact.validation';
-import { findContact } from '../helpers/findContact';
-import validate from '../../../lib/validators';
 import Contact from '../../../lib/models/contact';
-import { ITenant } from '../../tenants/interfaces/ITenant';
 import { IError } from '../../../lib/interfaces/IError';
-import { IContact } from '../../../lib/interfaces/IContact';
+import { IContact } from '../interfaces/IContact';
 import DateHelper from '../../../lib/helpers/DateHelper';
-import { jsonApiErrorResponseFromValidateJsError } from '../../../lib/helpers/jsonApiErrorResponseFromValidateJsError';
 import { jsonApiSuccessResponseFromMongooseQuery } from '../../../lib/helpers/jsonApiSuccessResponseFromMongooseQuery';
-import { IJsonApiError } from '../../../lib/interfaces/IJsonApiError';
-// temporary..
-const tenant: ITenant = {
-  email: 'test@gmail.com',
-  countryCode: '+27',
-  contacts: [],
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
-};
 
 // -------------------------------------------------------------------------------------------------
 //createContact
@@ -36,29 +22,18 @@ const createNewContact = async (contactData: Record<any, any>, clientId: string)
 
 export const createContact = async (req: Request, res: Response, next: NextFunction) => {
   const reqClientId = req.query.clientId as string;
-
   const resourceAttributes: Record<string, any> = req.body.data.attributes;
   const { email } = resourceAttributes;
 
-  //1. validate data
-  try {
-    await validate(resourceAttributes, contactValidation(tenant), {
-      format: 'detailed',
-    });
-  } catch (errors: any) {
-    const formattedErrors: Array<IJsonApiError> = jsonApiErrorResponseFromValidateJsError(errors);
-    return res.status(422).json({ errors: formattedErrors });
-  }
-
-  //2. check if contact already exists
-  const contact: IContact | null = await findContact(email);
+  //1. check if contact already exists
+  const contact: IContact | null = await Contact.findOne({ email });
   if (contact) {
     const error: IError = new Error('account exists');
     error.statusCode = 409; //conflict
     return next(error);
   }
 
-  //3. create new contact
+  //2. create new contact
   let newContact: IContact;
   try {
     newContact = await createNewContact(resourceAttributes, reqClientId);
@@ -68,11 +43,11 @@ export const createContact = async (req: Request, res: Response, next: NextFunct
     return next(error);
   }
 
-  //4. format contact response
+  //3. format contact response
   const response = jsonApiSuccessResponseFromMongooseQuery(newContact);
   const formattedResponse = { data: response };
 
-  //5. send response
+  //4. send response
   return res.status(201).json(formattedResponse);
 };
 
@@ -165,14 +140,7 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
   const reqQueryContact = req.params.id;
   const resourceAttributes = req.body.data.attributes;
 
-  //1. validate data
-  const validationErrors = validate(resourceAttributes, contactValidation(tenant), { format: 'detailed' });
-  if (validationErrors) {
-    const formattedErrors: Array<IJsonApiError> = jsonApiErrorResponseFromValidateJsError(validationErrors);
-    return res.status(422).json({ errors: formattedErrors });
-  }
-
-  //2. find AND update contact
+  //1. find AND update contact
   let contact: IContact | null;
   try {
     contact = await updateContactById(reqClientId, reqQueryContact, resourceAttributes);
@@ -187,11 +155,11 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
     return next(error);
   }
 
-  //3. format response
+  //2. format response
   const response = jsonApiSuccessResponseFromMongooseQuery(contact);
   const formattedResponse = { data: response };
 
-  //4. send response
+  //3. send response
   return res.status(200).json(formattedResponse);
 };
 

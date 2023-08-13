@@ -1,4 +1,4 @@
-import { PhoneNumberUtil } from 'google-libphonenumber';
+import { PhoneNumberUtil, RegionCode } from 'google-libphonenumber';
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
@@ -19,7 +19,7 @@ export const isPhoneNumber = (value: string, countryCode?: string) => {
     const strippedNonNumericCountryCode = countryCode.replace(/\D/g, ''); //remove non numeric chars eg. the prepended +
     const region = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(parseInt(strippedNonNumericCountryCode));
 
-    if (region === 'ZZ') {
+    if (region === ('ZZ' as RegionCode)) {
       return 'Country code incorrect';
     }
 

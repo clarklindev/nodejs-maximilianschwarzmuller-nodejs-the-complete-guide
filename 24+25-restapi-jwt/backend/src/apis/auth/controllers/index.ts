@@ -3,53 +3,37 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-import validate from '../../../lib/validators'; // import validate from 'validate.js';  //NB: dont import validate directly
-import { validationSchema as authSignupValidation } from './authSignup.validation';
-import { validationSchema as authLoginValidation } from './authLogin.validation';
 import User from '../../../lib/models/user';
-import { jsonApiErrorResponseFromValidateJsError } from '../../../lib/helpers/jsonApiErrorResponseFromValidateJsError';
-import { findUser } from '../helpers/findUser';
 import { getEmailTransporter } from '../../../lib/helpers/getEmailTransporter';
 import { IError } from '../../../lib/interfaces/IError';
-import { IUser } from '../../../lib/interfaces/IUser';
+import { IUser } from '../interfaces/IUser';
 
 // -------------------------------------------------------------------------------------------------
-
-// login
-
-const authenticateUser = async (password: string, hashedPassword: string) => {
-  return bcrypt.compare(password, hashedPassword);
-};
-
 const generateToken = async (payload: any) => {
   return await jwt.sign(payload, process.env.JWT_SECRET as jwt.Secret, {
     expiresIn: '1h',
   });
 };
 
+// login
+const authenticateUser = async (password: string, hashedPassword: string) => {
+  return bcrypt.compare(password, hashedPassword);
+};
+
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   const resourceAttributes = req.body.data.attributes;
   const { email, password } = resourceAttributes;
 
-  //1. validate
-  try {
-    await validate(resourceAttributes, authLoginValidation, {
-      format: 'detailed',
-    });
-  } catch (errors: any) {
-    const formattedResponse = { errors: jsonApiErrorResponseFromValidateJsError(errors) };
-    return res.status(422).json(formattedResponse);
-  }
+  //1. make sure user exists
+  const user: IUser | null = await User.findOne({ email });
 
-  //2. make sure user exists
-  const user: IUser | null = await findUser({ email });
   if (!user) {
     const error: IError = new Error('user does not exist');
     error.statusCode = 404;
     return next(error);
   }
 
-  //3. authenticate user
+  //2. authenticate user
   const authenticated = await authenticateUser(password, user.password);
   if (!authenticated) {
     const error: IError = new Error('account details invalid');
@@ -57,18 +41,23 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     return next(error);
   }
 
-  //4. generate token
-  const saveInToken = { username: user.username, email: user.email, userId: user._id.toString() };
+  //3. generate token
+  const payload = {
+    username: user.username,
+    email: user.email,
+    userId: user._id.toString(),
+    verified: user.verified,
+  };
   let token;
   try {
-    token = await generateToken(saveInToken);
+    token = await generateToken(payload);
   } catch (err: any) {
     const error: IError = new Error('generate token failed');
     error.statusCode = err.status;
     return next(error);
   }
 
-  //5. send response including token
+  //4. send response including token
   const formattedResponse = {
     data: {
       id: user._id.toString(),
@@ -83,7 +72,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       message: 'User successfully logged in.',
     },
   };
-  return res.json(formattedResponse);
+
+  return res.status(200).json(formattedResponse);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -98,6 +88,7 @@ const saveNewUser = async (username: string, email: string, password: string): P
   const newUser = new User({
     username,
     email,
+    verified: false,
     password: hashedPassword,
     cart: { items: [] },
     products: [],
@@ -133,25 +124,15 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
   const resourceAttributes = req.body.data.attributes;
   const { username, email, password } = resourceAttributes;
 
-  //1. validate
-  try {
-    await validate.async(resourceAttributes, authSignupValidation, {
-      format: 'detailed',
-    } as validate.AsyncValidateOption);
-  } catch (errors: any) {
-    const formattedResponse = { errors: jsonApiErrorResponseFromValidateJsError(errors) };
-    return res.status(422).json(formattedResponse);
-  }
-
-  //2. check if user exists
-  const user: IUser | null = await findUser({ email });
+  //1. check if user exists
+  const user: IUser | null = await User.findOne({ email });
   if (user) {
     const error: IError = new Error('account exists');
     error.statusCode = 409; //conflict
     return next(error);
   }
 
-  //3. add new user
+  //2. add new user
   let newUser;
   try {
     newUser = await saveNewUser(username, email, password);
@@ -161,7 +142,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     return next(error);
   }
 
-  //4. send signup email
+  //3. send signup email
   try {
     await sendSignupEmail(email);
   } catch (err: any) {
@@ -170,11 +151,22 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     return next(error);
   }
 
-  //6. send response
+  //4. create token for response
+  const payload = { username: newUser.username, email: newUser.email, userId: newUser._id.toString(), verified: false };
+  let token;
+  try {
+    token = await generateToken(payload);
+  } catch (err: any) {
+    const error: IError = new Error('generate token failed');
+    error.statusCode = err.status;
+    return next(error);
+  }
+
+  //5. send response
   const formattedResponse = {
     data: {
       type: 'users',
-      id: newUser._id.toString(),
+      id: newUser._id.toString(), //return user._id - this is the important part...
       attributes: {
         username,
         email,
@@ -182,6 +174,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     },
     meta: {
       message: 'User successfully signed up.',
+      token,
     },
   };
   return res.status(201).json(formattedResponse);
@@ -248,7 +241,7 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
   //2. find user
   let user: IUser | null;
   try {
-    user = await findUser({ email });
+    user = await User.findOne({ email });
   } catch (err: any) {
     const error: IError = new Error('user not found');
     error.statusCode = err.status;

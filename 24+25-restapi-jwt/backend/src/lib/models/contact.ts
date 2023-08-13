@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-import { IContact } from '../interfaces/IContact';
+import { IContact } from '../../apis/contacts/interfaces/IContact';
 import DateHelper from '../helpers/DateHelper';
 
 const contactSchema = new Schema<IContact>(

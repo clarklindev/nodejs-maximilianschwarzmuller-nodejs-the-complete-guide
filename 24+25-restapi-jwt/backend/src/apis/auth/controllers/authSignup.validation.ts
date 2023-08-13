@@ -8,6 +8,7 @@ export const validationSchema = {
     email: true,
     emailAvailable: true,
   },
+
   password: {
     presence: true,
     length: {

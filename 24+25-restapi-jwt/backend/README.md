@@ -164,21 +164,6 @@ Product.find().select('title price -_id'); //return title, price, not _id
 const products = await Product.find().populate('userId', 'name'); //returns ALWAYS _id unless specified not to, and "name"
 ```
 
-### install body-parser \*DEPRECATED
-
-- note: since express 4.16 it is not necessary to import body-parser
-
-#### NEW METHOD
-
-```js
-import express, { Express } from 'express';
-
-app.use(express.json()); //parse incoming requests for json data
-app.use(express.urlencoded({ extended: true })); //form data
-```
-
-#### OLD METHOD
-
 ## Create
 
 - create a default user if no users exist
@@ -238,7 +223,21 @@ npm i mongodb
 - externalize username/password into .env
 - add .env to .gitignore
 
-### install body-parser
+
+### install body-parser \*DEPRECATED
+
+- note: since express 4.16 it is not necessary to import body-parser
+
+#### NEW METHOD
+
+```js
+import express, { Express } from 'express';
+
+app.use(express.json()); //parse incoming requests for json data
+app.use(express.urlencoded({ extended: true })); //form data
+```
+
+#### OLD METHOD
 
 ```shell
 npm i body-parser
@@ -269,6 +268,8 @@ const query = { _id: new mongodb.ObjectId(productId) };
 ## gotchas
 
 mongodb uses '.\_id' as opposed to '.id'
+
+---
 
 ## Routes
 
@@ -875,7 +876,7 @@ const fileStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(
       null,
-      DateHelper.filenameFriendlyUTCDate(new Date()) + '__' + file.originalname, //create unique filename
+      DateHelper.filenameFriendlyDate(new Date()) + '__' + file.originalname //create unique filename
     ); //file.filename is the new name multer gives
   },
 });
@@ -922,6 +923,7 @@ exports.updatePost = (req, res, next) => {
 ## deleting with postman
 
 - if you delete db image references with postman, dont forget to cleanup the images/ folder on the backend server
+
 
 ---
 

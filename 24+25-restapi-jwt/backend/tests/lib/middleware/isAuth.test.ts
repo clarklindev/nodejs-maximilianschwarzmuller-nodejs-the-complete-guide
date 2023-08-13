@@ -38,7 +38,7 @@ describe('isAuth()', () => {
 
   it('should yield a userId after decoding the token', () => {
     const req = {
-      get: (header) => {
+      get: () => {
         return 'Bearer xyz ppp';
       },
     };
